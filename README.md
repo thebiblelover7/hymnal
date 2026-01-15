@@ -6,4 +6,4 @@ This app is still in active development.
 
 ## Screenshots
 
-![Image of home screen](docs/img/screeshot-1.png) ![Image of hymn screen](docs/img/screeshot-2.png)
+![Image of home screen](docs/img/screenshot-1.png) ![Image of hymn screen](docs/img/screenshot-2.png)
