@@ -4,6 +4,10 @@ An Android hymnal app for the Seventh-Day Adventist hymnals. Heavily inspired by
 
 This app is still in active development.
 
+## Testing
+
+Join the internal testing team on [Google Play](https://play.google.com/apps/internaltest/4700594277755933944). Releases on GitHub will be available soon.
+
 ## Screenshots
 
 ![Image of home screen](docs/img/screenshot-1.png) ![Image of hymn screen](docs/img/screenshot-2.png)
