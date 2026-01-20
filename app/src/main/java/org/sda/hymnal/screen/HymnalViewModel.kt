@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.sda.hymnal.data.Hymn
 
 class HymnalViewModel() : ViewModel() {
     private val _hymnalState = MutableStateFlow(HymnalState())
@@ -33,13 +34,17 @@ class HymnalViewModel() : ViewModel() {
                     }
                 }
 
+                is HymnalEvent.SetCurrentSheetMusic -> {
+                    val hymn = _hymnalState.value.currentHymn!!
+                    val resourcedHymn = Hymn(title = hymn.title, hymnal = hymn.hymnal, number = hymn.number, text = hymn.text, sheetMusic = event.resources)
+                    _hymnalState.update {
+                        it.copy(
+                            currentHymn = resourcedHymn
+                        )
+                    }
+                }
+
                 is HymnalEvent.LoadHymns -> {
-//                    val hymns = emptyList<Hymn>()
-//                    viewModelScope.launch(Dispatchers.IO){
-//                        try {
-//                            coroutineContext.
-//                        }
-//                    }
                     _hymnalState.update {
                         it.copy(
                             allHymns = _hymnalState.value.allHymns + event.hymns

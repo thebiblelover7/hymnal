@@ -5,5 +5,6 @@ class Hymn(
     val title: String,
     val hymnal: Hymnal,
     val number: Int,
-    val text: String
+    val text: String,
+    val sheetMusic: List<Int> = emptyList(),
 )
