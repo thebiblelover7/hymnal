@@ -1,9 +1,15 @@
 package org.sda.hymnal.data
 
+import java.text.Normalizer
+
 // This was written very helpfully by Claude, as I basically do not
 // understand how this works at all. The idea is that it calculates
 // the similarity between two strings and then only returns those above
 // a certain threshold.
+
+fun String.removeExtraMarks() =
+    Normalizer.normalize(this, Normalizer.Form.NFD)
+    .replace("\\p{Mn}+".toRegex(), "")
 
 object FuzzySearch {
     fun levenshteinDistance(a: String, b: String): Int {
@@ -66,8 +72,8 @@ object FuzzySearch {
 
         return items
             .map { item ->
-                val titleScore = similarityScore(query, titleSelector(item))
-                val bodyScore = similarityScore(query, bodySelector(item))
+                val titleScore = similarityScore(query.removeExtraMarks(), titleSelector(item).removeExtraMarks())
+                val bodyScore = similarityScore(query.removeExtraMarks(), bodySelector(item).removeExtraMarks())
                 val weightedScore = (titleScore * titleWeight) + (bodyScore * bodyWeight)
                 item to weightedScore
             }

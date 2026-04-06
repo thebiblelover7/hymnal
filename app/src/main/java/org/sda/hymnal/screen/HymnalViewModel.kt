@@ -40,7 +40,7 @@ class HymnalViewModel() : ViewModel() {
                     bodyWeight = 0.2,
                     titleSelector = {it.title},
                     bodySelector = {it.text}
-                )
+                ).distinct()
             }
             .flowOn(Dispatchers.Default)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
