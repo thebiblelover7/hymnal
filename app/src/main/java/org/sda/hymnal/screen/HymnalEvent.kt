@@ -10,5 +10,8 @@ sealed interface HymnalEvent {
     data class LoadHymns(val hymns: List<Hymn>): HymnalEvent
     data class SetLoadingHymns(val isLoadingHymns: Boolean): HymnalEvent
     data class SetCurrentHymnal(val hymnal: Hymnal): HymnalEvent
+    data class EnableSearch(val isSearching: Boolean): HymnalEvent
+    data class SetSearchNumber(val searchNumber: String): HymnalEvent
+    data class SetSearchHymn(val searchHymn: Hymn?): HymnalEvent
     data class SetSearchString(val searchString: String): HymnalEvent
 }

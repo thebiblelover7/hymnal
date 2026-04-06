@@ -12,4 +12,6 @@ object NavigationScreens {
     object Hymn: Screen("Hymn")
     @Serializable
     object SheetMusic: Screen("Sheet Music")
+    @Serializable
+    object Info: Screen("Info")
 }
