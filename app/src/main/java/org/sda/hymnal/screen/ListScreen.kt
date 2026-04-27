@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -170,14 +171,14 @@ fun HymnListItem(
                 enabled = true,
                 onClick = { onHymnClick(hymn) }
             )
-            .padding(2.dp)
-            .height(64.dp),
+            .padding(vertical = 0.dp, horizontal = 5.dp),
+//            .height(64.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
             modifier = Modifier
-                .padding(10.dp)
-                .weight(2f),
+                .defaultMinSize(minWidth = 80.dp)
+                .padding(horizontal = 20.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -189,8 +190,8 @@ fun HymnListItem(
         }
         Column(
             modifier = Modifier
-                .padding(10.dp)
-                .weight(10f),
+                .fillMaxWidth()
+                .padding(vertical = 10.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start
         ) {
