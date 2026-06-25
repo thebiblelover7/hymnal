@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "2.2.0"
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -57,6 +58,9 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.zoomable)
     implementation(libs.lazycolumnscrollbar)
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
