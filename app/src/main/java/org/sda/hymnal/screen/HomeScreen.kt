@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -37,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.sda.hymnal.BottomHymnalBar
+import org.sda.hymnal.R
 import org.sda.hymnal.data.Hymn
 import org.sda.hymnal.data.Hymnal
 import org.sda.hymnal.data.hymnalList
@@ -70,24 +72,30 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-//        val textFieldValue = remember { mutableStateOf<String>("") }
-//        val textFieldNumber = rememberTextFieldState()
             Row(
                 modifier = Modifier.weight(4f)
             ) { }
             Row(
                 modifier = Modifier.padding(6.dp)
             ) {
+                if (currentHymn != null) {
                 Text(
-                    text = currentHymn?.title ?: "",
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                        text = currentHymn.title,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
                     fontStyle = FontStyle.Italic,
                     fontWeight = FontWeight.Medium
                 )
+                } else {
+                    Text(
+                        text = stringResource(R.string.enter_hymn),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
+                        fontStyle = FontStyle.Normal,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
             Row(
                 modifier = Modifier
-//                .weight(1f)
                     .requiredHeight(96.dp)
                     .padding(6.dp)
             ) {
@@ -129,7 +137,7 @@ fun HomeScreen(
                 Button(
                     onClick = onHymnSubmit
                 ) {
-                    Text("Open")
+                    Text(stringResource(R.string.home_open))
                 }
             }
             Row(
@@ -159,7 +167,7 @@ fun HymnalDropdown(currentHymnal: Hymnal, onHymnalClick: (hymnal: Hymnal) -> Uni
             Text(currentHymnal.title)
             Icon(
                 imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = "Dropdown arrow"
+                contentDescription = stringResource(R.string.icons_dropdown_arrow)
             )
         }
 

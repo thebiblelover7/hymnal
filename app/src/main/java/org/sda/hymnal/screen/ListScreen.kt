@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -42,6 +43,7 @@ import kotlinx.coroutines.flow.StateFlow
 import my.nanihadesuka.compose.LazyColumnScrollbar
 import my.nanihadesuka.compose.ScrollbarSettings
 import org.sda.hymnal.BottomHymnalBar
+import org.sda.hymnal.R
 import org.sda.hymnal.data.Hymn
 import org.sda.hymnal.data.hymnTags
 
@@ -76,10 +78,10 @@ fun ListScreen(
                         onSearch = {},
                         modifier = Modifier,
                         placeholder = {
-                                Text("Search hymns...")
+                                Text(stringResource(R.string.search_hymns))
                             },
                         leadingIcon = {
-                                Icon(Icons.Default.Search, contentDescription = "Search icon")
+                                Icon(Icons.Default.Search, contentDescription = stringResource(R.string.icon_search))
                             },
                         trailingIcon = {
                                 if (searchActive) {
@@ -87,7 +89,9 @@ fun ListScreen(
                                         onClick = {
                                             if (query.value.isNotEmpty()) onSearchChange("") else searchActive = false
                                         }
-                                    ) { Icon(Icons.Default.Close, contentDescription = "Clear search")}
+                                    ) { Icon(Icons.Default.Close, contentDescription = stringResource(
+                                        R.string.icon_clear
+                                    ))}
                                 }
                             },
                     )

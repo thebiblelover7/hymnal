@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
+import org.sda.hymnal.R
 import org.sda.hymnal.data.Hymn
 import org.sda.hymnal.data.hymnTags
 
@@ -75,7 +77,7 @@ fun HymnScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             HymnScreenTopBar(
-                title = "Hymn " + hymn.number.toString(),
+                title = stringResource(R.string.hymn) + " "+ hymn.number.toString(),
                 onClickBack = onClickBack
             )
         },
@@ -112,7 +114,6 @@ fun HymnScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-    //                    .padding(padding)
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -188,7 +189,7 @@ fun HymnScreenTopBar(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = stringResource(R.string.icon_back)
                 )
             }
         }
@@ -207,17 +208,22 @@ fun HymnScreenBottomBar(
 ) {
     HorizontalFloatingToolbar(
         modifier = modifier,
-        leadingContent = {
+        content = {
+val strPrevHymn = stringResource(R.string.previous_hymn)
+            val strNextHymn = stringResource(R.string.next_hymn)
+            val strFavorite = stringResource(R.string.favorite)
+            val strSheetMusic = stringResource(R.string.sheet_music)
+            val strLyrics = stringResource(R.string.lyrics)
             AppBarRow {
                 clickableItem(
                     onClick = onPreviousHymnClick,
                     icon = {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowLeft,
-                            contentDescription = "left arrow"
+                            contentDescription = stringResource(R.string.icon_left_arrow)
                         )
                     },
-                    label = "Previous Hymn",
+                    label = strPrevHymn,
                     enabled = hymn.number != 1
                 )
                 clickableItem(
@@ -225,10 +231,10 @@ fun HymnScreenBottomBar(
                     icon = {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowRight,
-                            contentDescription = "right arrow"
+                            contentDescription = stringResource(R.string.icon_right_arrow)
                         )
                     },
-                    label = "Next Hymn",
+                    label = strNextHymn,
                     enabled = hymn.number != hymnTotal
                 )
             }
@@ -266,7 +272,7 @@ fun SheetMusicScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             HymnScreenTopBar(
-                title = "Sheet Music",
+                title = stringResource(R.string.sheet_music),
                 onClickBack = onClickBack
             )
         }
@@ -282,7 +288,7 @@ fun SheetMusicScreen(
                 if (resource != 0) {
                     Image(
                         painter = painterResource(resource),
-                        contentDescription = "Sheet music",
+                                contentDescription = stringResource(R.string.icon_sheet_music),
                         contentScale = ContentScale.FillWidth,
                         modifier = Modifier
                             .fillMaxWidth()

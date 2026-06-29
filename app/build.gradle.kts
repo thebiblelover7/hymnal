@@ -11,7 +11,9 @@ android {
     compileSdk {
         version = release(36)
     }
-
+    androidResources {
+        generateLocaleConfig = true
+    }
     defaultConfig {
         applicationId = "org.sda.hymnal"
         minSdk = 24

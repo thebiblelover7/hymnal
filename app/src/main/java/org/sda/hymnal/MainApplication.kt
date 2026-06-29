@@ -40,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
@@ -464,19 +465,19 @@ fun BottomHymnalBar(
         if (targetState) {
             val navItems = listOf(
                 NavItem(
-                    title = "Home",
+                    title = stringResource(R.string.nav_home),
                     screen = NavigationScreens.Home,
                     icon = Icons.Outlined.Home,
                     iconSelected = Icons.Filled.Home
                 ),
                 NavItem(
-                    title = "List",
+                    title = stringResource(R.string.nav_list),
                     screen = NavigationScreens.List,
                     icon = Icons.AutoMirrored.Default.List,
                     iconSelected = Icons.AutoMirrored.Default.List
                 ),
                 NavItem(
-                    title = "Info",
+                    title = stringResource(R.string.nav_settings),
                     screen = NavigationScreens.Info,
                     icon = Icons.Outlined.Info,
                     iconSelected = Icons.Filled.Info

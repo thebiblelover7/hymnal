@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Hymnal</string>
+    <string name="hymn">Himno</string>
+    <string name="icon_favorite">Favorito</string>
+    <string name="open_sheet_music">Abrir partituras</string>
+    <string name="icon_music_note">Nota de musica</string>
+    <string name="sheet_music">Partituras</string>
+    <string name="icon_sheet_music">Partituras</string>
+    <string name="icon_logo">Logo</string>
+    <string name="app_title">Himnario</string>
+    <string name="app_description">Un himnario adventista del séptimo día disponible en varios idiomas para Android.</string>
+    <string name="app_source_code">Codigo fuente</string>
+    <string name="home_open">Abrir</string>
+    <string name="search_hymns">Buscar himnos...</string>
+    <string name="icon_search">Buscar</string>
+    <string name="icon_clear">Borrar</string>
+    <string name="next_hymn">Siguiente himno</string>
+    <string name="previous_hymn">Himno anterior</string>
+    <string name="icon_back">Atrás</string>
+    <string name="favorite">Favorito</string>
+    <string name="lyrics">Letra</string>
+    <string name="enter_hymn">Ingresa un número de himno</string>
+    <string name="nav_home">Inicio</string>
+    <string name="nav_list">Lista</string>
+    <string name="nav_settings">Ajustes</string>
+</resources>

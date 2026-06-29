@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -66,16 +67,16 @@ fun SettingsScreen(
                 ) {
                     Image(
                         painter = painterResource(R.drawable.logo_monochrome),
-                        contentDescription = "logo",
+                        contentDescription = stringResource(R.string.icon_logo),
                         modifier = Modifier.padding(24.dp)
                     )
                     Text(
-                        text = "Hymnal",
+                        text = stringResource(R.string.app_title),
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 28.sp,
                     )
                     Text(
-                        text = "A Seventh-Day Adventist hymnal Android app in various languages.",
+                        text = stringResource(R.string.app_description),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -92,7 +93,7 @@ fun SettingsScreen(
                 Icon(
                     imageVector = Icons.Filled.Build,
                     tint = MaterialTheme.colorScheme.primary,
-                    contentDescription = "Source Code",
+                    contentDescription = stringResource(R.string.app_source_code),
                     modifier = Modifier.padding(12.dp)
                 )
                 Text(
@@ -102,50 +103,12 @@ fun SettingsScreen(
                                 "https://github.com/thebiblelover7/hymnal"
                             )
                         ) {
-                            append("Source Code")
+                            append(stringResource(R.string.app_source_code))
                         }
                     },
                     color = MaterialTheme.colorScheme.primary
                 )
                 //            }
-            }
-        }
-    }
-}
-
-
-@SuppressLint("DiscouragedApi")
-@Composable
-fun SupportScreen(
-    onClickBack: () -> Unit,
-    hymn: Hymn
-) {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            HymnScreenTopBar(
-                title = "Sheet Music",
-                onClickBack = onClickBack
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .zoomable(rememberZoomableState())
-                .verticalScroll(rememberScrollState())
-                .padding(padding)
-        ) {
-            for (resource in hymn.sheetMusic) {
-                if (resource != 0) {
-                    Image(
-                        painter = painterResource(resource),
-                        contentDescription = "Sheet music",
-                        contentScale = ContentScale.FillWidth,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    )
-                }
             }
         }
     }
