@@ -6,12 +6,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Scaffold
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import org.sda.hymnal.screen.HymnalViewModel
+import org.sda.hymnal.data.HymnalViewModel
 import org.sda.hymnal.ui.theme.HymnalTheme
 
 
@@ -22,7 +19,7 @@ class MainActivity : ComponentActivity() {
         factoryProducer = {
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return HymnalViewModel() as T
+                    return HymnalViewModel(applicationContext) as T
                 }
             }
         }

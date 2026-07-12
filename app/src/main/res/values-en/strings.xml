@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Hymnal</string>
     <string name="home_open">Open</string>
-    <string name="icons_dropdown_arrow">dropdown arrow</string>
+    <string name="icon_dropdown_arrow">dropdown arrow</string>
     <string name="hymn">Hymn</string>
     <string name="icon_left_arrow">left arrow</string>
     <string name="icon_right_arrow">right arrow</string>
@@ -13,9 +13,9 @@
     <string name="icon_sheet_music">Sheet Music</string>
     <string name="icon_logo">Logo</string>
     <string name="app_title">Hymnal</string>
-    <string name="app_description">A Seventh-Day Adventist hymnal Android app in various languages.</string>
+    <string name="app_description">A Seventh-Day Adventist hymnal app in various languages.</string>
     <string name="app_source_code">Source Code</string>
-    <string name="search_hymns">Search hymns...</string>
+    <string name="search_hymns">Search hymns…</string>
     <string name="icon_search">Search</string>
     <string name="icon_clear">Clear</string>
     <string name="next_hymn">Next Hymn</string>
@@ -27,4 +27,22 @@
     <string name="nav_home">Home</string>
     <string name="nav_list">List</string>
     <string name="nav_settings">Settings</string>
+    <string name="settings_font_size">Font Size</string>
+    <string name="settings_example_font">This is an example of the size of the hymn text.</string>
+    <string name="nav_playlists">Playlists</string>
+    <string name="icon_add_to_playlist">Add to Playlist</string>
+    <string name="icon_add">Add</string>
+    <string name="playlist">Playlist</string>
+    <string name="icon_more">More</string>
+    <string name="hymn_added_to_playlist">Hymn added to playlist %1$s</string>
+    <string name="delete_playlist">Delete Playlist</string>
+    <string name="playlist_name">Name</string>
+    <string name="dialog_close">Dismiss</string>
+    <string name="dialog_add">Add</string>
+    <string name="dialog_rename">Rename</string>
+    <string name="rename_playlist">Rename playlist</string>
+    <string name="remove_from_playlist">Remove from playlist</string>
+    <string name="playlist_move_up">Move up</string>
+    <string name="playlist_move_down">Move down</string>
+    <string name="add_to_playlist">Add to Playlist</string>
 </resources>

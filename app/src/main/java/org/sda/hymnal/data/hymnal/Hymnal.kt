@@ -1,4 +1,4 @@
-package org.sda.hymnal.data
+package org.sda.hymnal.data.hymnal
 
 open class Hymnal(
     val title: String,

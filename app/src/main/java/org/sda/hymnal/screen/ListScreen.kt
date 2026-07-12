@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -44,16 +45,19 @@ import my.nanihadesuka.compose.LazyColumnScrollbar
 import my.nanihadesuka.compose.ScrollbarSettings
 import org.sda.hymnal.BottomHymnalBar
 import org.sda.hymnal.R
-import org.sda.hymnal.data.Hymn
-import org.sda.hymnal.data.hymnTags
+import org.sda.hymnal.data.hymn.Hymn
+import org.sda.hymnal.data.hymn.hymnTags
+import org.sda.hymnal.data.playlist.PlaylistHymn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListScreen(
     currentScreen: Screen,
+    snackbarHost: @Composable () -> Unit,
     onNavClick: (screen: Screen) -> Unit,
-    hymns: List<Hymn>,
-    onHymnClick: (hymn: Hymn) -> Unit,
+    hymns: MutableList<Pair<Hymn, PlaylistHymn?>>,
+//    onHymnClick: (hymn: Hymn) -> Unit,
+    onHymnClick: (hymnPair: Pair<Hymn, PlaylistHymn?>) -> Unit,
     isPerformingSearch: Boolean,
     searchQuery: MutableStateFlow<String>,
     onSearchChange: (query: String) -> Unit,
@@ -63,6 +67,7 @@ fun ListScreen(
     val query = searchQuery.collectAsState()
     val searchedHymns = searchResults.collectAsState()
     Scaffold(
+        snackbarHost = snackbarHost,
         modifier = Modifier.fillMaxSize(),
         topBar = {
             val colors1 = SearchBarDefaults.colors()
@@ -121,7 +126,7 @@ fun ListScreen(
                         }
                     }
                     items(searchedHymns.value) { hymn ->
-                        HymnListItem(hymn, onHymnClick)
+                        HymnListItem(Pair(hymn, null), onHymnClick)
                     }
                 }
             }
@@ -136,9 +141,10 @@ fun ListScreen(
         val listState = rememberLazyListState()
         LazyColumnScrollbar(
             state = listState,
+            modifier = Modifier.padding(padding),
             settings = ScrollbarSettings.Default.copy(
-                thumbUnselectedColor = MaterialTheme.colorScheme.onPrimary,
-                thumbSelectedColor = MaterialTheme.colorScheme.onSecondary
+                thumbUnselectedColor = MaterialTheme.colorScheme.secondary.copy(0.5f),
+                thumbSelectedColor = MaterialTheme.colorScheme.secondary
             ),
 //            indicatorContent = { index, isThumbSelected ->
 //                Text(
@@ -150,7 +156,8 @@ fun ListScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize(),
-                contentPadding = padding,
+                contentPadding = PaddingValues(vertical = 10.dp),
+//                contentPadding = padding,
                 state = listState
             ) {
                 items(hymns) { hymn ->
@@ -164,15 +171,16 @@ fun ListScreen(
 
 @Composable
 fun HymnListItem(
-    hymn: Hymn,
-    onHymnClick: (hymn: Hymn) -> Unit
+//    hymn: Hymn,
+    hymnPair: Pair<Hymn, PlaylistHymn?>,
+    onHymnClick: (hymnPair: Pair<Hymn, PlaylistHymn?>) -> Unit
 ) {
     val regex = Regex("(${hymnTags.joinToString(separator = "|")})\n")
     Row(
         modifier = Modifier
             .clickable(
                 enabled = true,
-                onClick = { onHymnClick(hymn) }
+                onClick = { onHymnClick(hymnPair) }
             )
             .padding(vertical = 0.dp, horizontal = 5.dp),
 //            .height(64.dp),
@@ -186,7 +194,7 @@ fun HymnListItem(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = hymn.number.toString(),
+                text = hymnPair.first.number.toString(),
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 24.sp
             )
@@ -199,13 +207,13 @@ fun HymnListItem(
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = hymn.title,
+                text = hymnPair.first.title,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )
-            val shortTextLine = hymn.text.take(50)
+            val shortTextLine = hymnPair.first.text.take(50)
                 .replace(regex = regex, replacement = "")
             Text(
                 text = shortTextLine,

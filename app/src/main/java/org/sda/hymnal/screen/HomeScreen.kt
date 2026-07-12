@@ -39,9 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.sda.hymnal.BottomHymnalBar
 import org.sda.hymnal.R
-import org.sda.hymnal.data.Hymn
-import org.sda.hymnal.data.Hymnal
-import org.sda.hymnal.data.hymnalList
+import org.sda.hymnal.data.hymn.Hymn
+import org.sda.hymnal.data.hymnal.Hymnal
+import org.sda.hymnal.data.hymnal.hymnalList
 
 @Composable
 fun HomeScreen(
@@ -52,9 +52,11 @@ fun HomeScreen(
     onSearchStringChange: (searchString: String) -> Unit,
     onHymnSubmit: () -> Unit,
     currentHymnal: Hymnal,
-    onHymnalClick: (hymnal: Hymnal) -> Unit
+    onHymnalClick: (hymnal: Hymnal) -> Unit,
+    snackbarHost: @Composable () -> Unit,
 ) {
     Scaffold(
+        snackbarHost = snackbarHost,
         modifier = Modifier.fillMaxSize(),
         topBar = {},
         bottomBar = {
@@ -79,12 +81,12 @@ fun HomeScreen(
                 modifier = Modifier.padding(6.dp)
             ) {
                 if (currentHymn != null) {
-                Text(
+                    Text(
                         text = currentHymn.title,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.9f),
-                    fontStyle = FontStyle.Italic,
-                    fontWeight = FontWeight.Medium
-                )
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.Medium
+                    )
                 } else {
                     Text(
                         text = stringResource(R.string.enter_hymn),
@@ -167,7 +169,7 @@ fun HymnalDropdown(currentHymnal: Hymnal, onHymnalClick: (hymnal: Hymnal) -> Uni
             Text(currentHymnal.title)
             Icon(
                 imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = stringResource(R.string.icons_dropdown_arrow)
+                contentDescription = stringResource(R.string.icon_dropdown_arrow)
             )
         }
 

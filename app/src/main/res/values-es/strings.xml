@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Hymnal</string>
+    <string name="icon_dropdown_arrow">Flecha de despliegue</string>
     <string name="hymn">Himno</string>
+    <string name="icon_right_arrow">Flecha derecha</string>
     <string name="icon_favorite">Favorito</string>
     <string name="open_sheet_music">Abrir partituras</string>
-    <string name="icon_music_note">Nota de musica</string>
+    <string name="icon_music_note">Nota de música</string>
     <string name="sheet_music">Partituras</string>
     <string name="icon_sheet_music">Partituras</string>
     <string name="icon_logo">Logo</string>
     <string name="app_title">Himnario</string>
-    <string name="app_description">Un himnario adventista del séptimo día disponible en varios idiomas para Android.</string>
+    <string name="app_description">Un himnario adventista del séptimo día disponible en varios idiomas.</string>
     <string name="app_source_code">Codigo fuente</string>
     <string name="home_open">Abrir</string>
-    <string name="search_hymns">Buscar himnos...</string>
+    <string name="search_hymns">Buscar himnos…</string>
     <string name="icon_search">Buscar</string>
     <string name="icon_clear">Borrar</string>
     <string name="next_hymn">Siguiente himno</string>
@@ -24,4 +26,23 @@
     <string name="nav_home">Inicio</string>
     <string name="nav_list">Lista</string>
     <string name="nav_settings">Ajustes</string>
+    <string name="settings_font_size">Tamaño de fuente</string>
+    <string name="settings_example_font">Este es un ejemplo del tamaño del texto del himno.</string>
+    <string name="nav_playlists">Listas de reproducción</string>
+    <string name="icon_add_to_playlist">Añadir a Lista</string>
+    <string name="add_to_playlist">Añadir a Lista</string>
+    <string name="icon_add">Añadir</string>
+    <string name="playlist">Lista de reproducción</string>
+    <string name="icon_more">Más</string>
+    <string name="hymn_added_to_playlist">Himno añadido a la lista de reproducción %1$s</string>
+    <string name="delete_playlist">Borrar Lista</string>
+    <string name="playlist_name">Nombre</string>
+    <string name="dialog_close">Descartar</string>
+    <string name="dialog_add">Añadir</string>
+    <string name="dialog_rename">Renombrar</string>
+    <string name="rename_playlist">Renombrar lista</string>
+    <string name="remove_from_playlist">Eliminar de la lista</string>
+    <string name="playlist_move_up">Mover hacia arriba</string>
+    <string name="playlist_move_down">Mover hacia abajo</string>
+    <string name="icon_left_arrow">Flecha izquierda</string>
 </resources>

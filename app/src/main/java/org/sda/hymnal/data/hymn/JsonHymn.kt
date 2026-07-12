@@ -1,4 +1,4 @@
-package org.sda.hymnal.data
+package org.sda.hymnal.data.hymn
 
 import kotlinx.serialization.Serializable
 
