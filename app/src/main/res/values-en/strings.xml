@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Hymnal</string>
     <string name="home_open">Open</string>
@@ -30,7 +31,6 @@
     <string name="settings_example_font">This is an example of the size of the hymn text.</string>
     <string name="nav_playlists">Playlists</string>
     <string name="icon_add_to_playlist">Add to Playlist</string>
-    <string name="add_to_playlist">Add to Playlist</string>
     <string name="icon_add">Add</string>
     <string name="playlist">Playlist</string>
     <string name="icon_more">More</string>
@@ -44,4 +44,5 @@
     <string name="remove_from_playlist">Remove from playlist</string>
     <string name="playlist_move_up">Move up</string>
     <string name="playlist_move_down">Move down</string>
+    <string name="add_to_playlist">Add to Playlist</string>
 </resources>

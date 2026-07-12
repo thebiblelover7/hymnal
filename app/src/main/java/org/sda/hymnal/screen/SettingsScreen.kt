@@ -1,14 +1,14 @@
 package org.sda.hymnal.screen
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -17,32 +17,36 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import me.saket.telephoto.zoomable.rememberZoomableState
-import me.saket.telephoto.zoomable.zoomable
 import org.sda.hymnal.BottomHymnalBar
 import org.sda.hymnal.R
-import org.sda.hymnal.data.Hymn
 
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsScreen(
+    snackbarHost: @Composable () -> Unit,
     currentScreen: Screen,
+    fontSize: Float,
     onNavClick: (screen: Screen) -> Unit,
+    onFontSizeSet: (fontSize: Float) -> Unit,
 ) {
     Scaffold(
+        snackbarHost = snackbarHost,
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             BottomHymnalBar(
@@ -59,31 +63,36 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row {
+            Row(
+                modifier = Modifier.padding(36.dp)
+            ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Image(
                         painter = painterResource(R.drawable.logo_monochrome),
-                        contentDescription = "logo",
-                        modifier = Modifier.padding(24.dp)
+                        contentDescription = stringResource(R.string.icon_logo),
+                        contentScale = ContentScale.FillWidth,
+                        modifier = Modifier.width(128.dp)
                     )
                     Text(
-                        text = "Hymnal",
+                        text = stringResource(R.string.app_title),
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 28.sp,
                     )
                     Text(
-                        text = "A Seventh-Day Adventist hymnal Android app in various languages.",
-                        style = MaterialTheme.typography.bodySmall
+                        text = stringResource(R.string.app_description),
+                        fontSize = 18.sp,
+                        lineHeight = 27.sp,
+//                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center
                     )
                 }
             }
             Row(
                 modifier = Modifier
-                    .height(100.dp)
-                    .padding(24.dp),
+                    .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 //            Column(
@@ -92,7 +101,7 @@ fun SettingsScreen(
                 Icon(
                     imageVector = Icons.Filled.Build,
                     tint = MaterialTheme.colorScheme.primary,
-                    contentDescription = "Source Code",
+                    contentDescription = stringResource(R.string.app_source_code),
                     modifier = Modifier.padding(12.dp)
                 )
                 Text(
@@ -102,50 +111,45 @@ fun SettingsScreen(
                                 "https://github.com/thebiblelover7/hymnal"
                             )
                         ) {
-                            append("Source Code")
+                            append(stringResource(R.string.app_source_code))
                         }
                     },
                     color = MaterialTheme.colorScheme.primary
                 )
                 //            }
             }
-        }
-    }
-}
-
-
-@SuppressLint("DiscouragedApi")
-@Composable
-fun SupportScreen(
-    onClickBack: () -> Unit,
-    hymn: Hymn
-) {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            HymnScreenTopBar(
-                title = "Sheet Music",
-                onClickBack = onClickBack
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .zoomable(rememberZoomableState())
-                .verticalScroll(rememberScrollState())
-                .padding(padding)
-        ) {
-            for (resource in hymn.sheetMusic) {
-                if (resource != 0) {
-                    Image(
-                        painter = painterResource(resource),
-                        contentDescription = "Sheet music",
-                        contentScale = ContentScale.FillWidth,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    )
-                }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.settings_font_size),
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f)
+                )
+                Slider(
+                    value = fontSize,
+                    onValueChange = onFontSizeSet,
+                    steps = 4,
+                    valueRange = 0.5f..1.75f,
+                    modifier = Modifier
+                        .size(128.dp)
+                        .weight(2f)
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.settings_example_font),
+                    fontSize = (18 * fontSize).sp,
+                    lineHeight = (27 * fontSize).sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(0.8f)
+                )
             }
         }
     }
