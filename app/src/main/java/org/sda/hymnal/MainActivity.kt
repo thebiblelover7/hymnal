@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             HymnalTheme {
-                MainApplication(applicationContext, hymnalViewModel)
+                MainApplication(hymnalViewModel)
             }
         }
     }

@@ -1,7 +1,6 @@
 package org.sda.hymnal
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedContentTransitionScope
@@ -56,7 +55,7 @@ import org.sda.hymnal.screen.SettingsScreen
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("DiscouragedApi")
 @Composable
-fun MainApplication(context: Context, hymnalViewModel: HymnalViewModel) {
+fun MainApplication(hymnalViewModel: HymnalViewModel) {
     val navController = rememberNavController()
     val hymnalState = hymnalViewModel.hymnalState.collectAsState()
     val isLoadingHymns = hymnalState.value.isLoadingHymns
