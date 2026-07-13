@@ -46,4 +46,8 @@
     <string name="playlist_move_down">Mover hacia abajo</string>
     <string name="icon_left_arrow">Flecha izquierda</string>
     <string name="favorites">Favoritos</string>
+    <string name="playlist_hymns">Lista de reproducción - %1$s</string>
+    <string name="hymn_added_to_favorites">Himno añadido a favoritos</string>
+    <string name="hymn_removed_from_favorites">Himno eliminado de favoritos</string>
+    <string name="hymn_removed_from_playlist">Himno eliminado de la lista de reproducción %1$s</string>
 </resources>
