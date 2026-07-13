@@ -29,13 +29,13 @@
     <string name="settings_font_size">Tamaño de fuente</string>
     <string name="settings_example_font">Este es un ejemplo del tamaño del texto del himno.</string>
     <string name="nav_playlists">Listas de reproducción</string>
-    <string name="icon_add_to_playlist">Añadir a Lista</string>
-    <string name="add_to_playlist">Añadir a Lista</string>
+    <string name="icon_add_to_playlist">Añadir a lista</string>
+    <string name="add_to_playlist">Añadir a lista</string>
     <string name="icon_add">Añadir</string>
     <string name="playlist">Lista de reproducción</string>
     <string name="icon_more">Más</string>
     <string name="hymn_added_to_playlist">Himno añadido a la lista de reproducción %1$s</string>
-    <string name="delete_playlist">Borrar Lista</string>
+    <string name="delete_playlist">Borrar lista</string>
     <string name="playlist_name">Nombre</string>
     <string name="dialog_close">Descartar</string>
     <string name="dialog_add">Añadir</string>
@@ -45,4 +45,5 @@
     <string name="playlist_move_up">Mover hacia arriba</string>
     <string name="playlist_move_down">Mover hacia abajo</string>
     <string name="icon_left_arrow">Flecha izquierda</string>
+    <string name="favorites">Favoritos</string>
 </resources>
