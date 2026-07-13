@@ -7,7 +7,7 @@ object NavigationScreens {
     @Serializable
     object Home: Screen("Home")
     @Serializable
-    object List: Screen("Hymns List")
+    object List: Screen("List")
     @Serializable
     object PlaylistList: Screen("Playlists")
     @Serializable
@@ -17,7 +17,5 @@ object NavigationScreens {
     @Serializable
     object Hymn: Screen("Hymn")
     @Serializable
-    object SheetMusic: Screen("Sheet Music")
-    @Serializable
-    object Settings: Screen("Info")
+    object Settings: Screen("Settings")
 }

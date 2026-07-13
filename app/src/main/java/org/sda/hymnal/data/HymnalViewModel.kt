@@ -1,7 +1,6 @@
 package org.sda.hymnal.data
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
@@ -42,8 +41,6 @@ class HymnalViewModel(
     private val settingDao = hymnDb.settingDao
     private val playlistDao = hymnDb.playlistDao
     private val playlistHymnDao = hymnDb.playlistHymnDao
-//    private val dbHymns =
-//        CoroutineScope(Dispatchers.IO).launch { hymnDao.getAll() }
 
     val hymnalState = _hymnalState.stateIn(
         viewModelScope, SharingStarted.WhileSubscribed(1000),
@@ -126,6 +123,11 @@ class HymnalViewModel(
 
                         if (playlist.id == "favorites") {
                             onEvent(HymnalEvent.SetFavorite)
+
+                            onEvent(HymnalEvent.ShowSnackbar(
+                                applicationContext.getString(
+                                    R.string.hymn_added_to_favorites
+                                )))
                             return@launch
                         }
                         if (toAdd) {    // to be added
@@ -156,9 +158,9 @@ class HymnalViewModel(
                             // Update playlistHymns list
                             val playlistHymn = currentPlaylistPlaylistHymns.find {
                                 it.hymnal == currentHymn.hymnal.fileName && it.number == currentHymn.number
-                            }
+                            } ?: return@launch
                             if (currentPlaylistPlaylistHymns.remove(playlistHymn)) {
-                                playlistHymnDao.deletePlaylistHymn(playlistHymn!!)
+                                playlistHymnDao.deletePlaylistHymn(playlistHymn)
                             }
                             _hymnalState.value.currentPlaylistHymns.remove(event.hymnPair.first)
 
@@ -187,6 +189,8 @@ class HymnalViewModel(
                     if (hymnPairPlaylistHymn != null) {
                         if (playlist.id == "favorites") {
                             onEvent(HymnalEvent.SetFavorite)
+                            onEvent(HymnalEvent.ShowSnackbar(
+                                applicationContext.getString(R.string.hymn_removed_from_favorites)))
                             return@launch
                         }
                         CoroutineScope(Dispatchers.IO).launch {
@@ -220,7 +224,11 @@ class HymnalViewModel(
                                     _hymnalState.value.playlists[indexOfPlaylist] = modifiedPlaylist
                                 }
                                 playlistDao.upsertPlaylist(modifiedPlaylist)
-
+                                onEvent(HymnalEvent.ShowSnackbar(
+                                    applicationContext.getString(
+                                        R.string.hymn_removed_from_playlist,
+                                        event.playlist.name
+                                    )))
                             }
                         }
                     }
@@ -229,40 +237,31 @@ class HymnalViewModel(
 
                 is HymnalEvent.MoveHymnInPlaylist -> {
                     val hymnPairPlaylistHymn = event.hymnPair.second
-                    Log.d("movePlaylist", "hymnPairPlaylistHymn: $hymnPairPlaylistHymn")
                     val playlist = event.playlist
                     val moveBy = event.moveBy
                     if (hymnPairPlaylistHymn != null) {
                         CoroutineScope(Dispatchers.IO).launch {
                             val playlistHymns = playlistHymnDao.getPlaylist(playlist.id)
                             playlistHymns.sortBy { it.position }
-                            Log.d("movePlaylist", "playlistHymns: $playlistHymns")
                             val playlistHymnIndex = playlistHymns.indexOf(hymnPairPlaylistHymn)
                             if (playlistHymnIndex != -1) {
                                 val range = if (moveBy < 0) {moveBy..0} else {(0..moveBy)}
                                 for (currentMoveBy in range) {
-                                    Log.d("movePlaylist", "currentMoveBy: $currentMoveBy")
                                     if (currentMoveBy != 0) {
                                         val hymnToModifyIndex = playlistHymnIndex + currentMoveBy
-                                        Log.d("movePlaylist", "hymnToModifyIndex: $hymnToModifyIndex")
                                         if (hymnToModifyIndex in playlistHymns.indices) {
                                             val hymnToModify = playlistHymns[hymnToModifyIndex]
-                                            Log.d("movePlaylist", "hymnToModify: $hymnToModify")
                                             val moveByDifference = if (moveBy < 0) {
                                                 1
                                             } else {
                                                 -1
                                             }
-                                            // TODO make sure that it's not at the beginning or the end of
-                                            //  the playlist so we can prevent the index OOB error
                                             val modifiedHymnPosition =
                                                 hymnToModify.position + moveByDifference
 
                                             val modifiedHymn = hymnToModify.copy(
                                                 position = modifiedHymnPosition
                                             )
-
-                                            Log.d("movePlaylist", "modifiedHymn: $modifiedHymn")
 
                                             playlistHymnDao.upsertPlaylistHymn(modifiedHymn)
                                             if (_hymnalState.value.currentPlaylist == playlist) {
@@ -278,8 +277,6 @@ class HymnalViewModel(
                                 // Modify the actual hymn
                                 val actualHymnIndex = playlistHymnIndex
                                 val actualHymn = playlistHymns[actualHymnIndex]
-                                // TODO make sure that it's not at the beginning or the end of
-                                //  the playlist so we can prevent the index OOB error
                                 var actualModifiedHymnPosition =
                                     actualHymn.position + moveBy
                                 if (actualModifiedHymnPosition > playlistHymns.size) {
@@ -302,7 +299,6 @@ class HymnalViewModel(
                                 }
 
                                 if (_hymnalState.value.currentPlaylist == playlist) {
-//                                    _hymnalState.value.currentPlaylistPair.sortBy { it.second!!.position }
                                     onEvent(HymnalEvent.LoadPlaylist(playlist))
                                 }
                             }
@@ -330,7 +326,7 @@ class HymnalViewModel(
                 }
 
                 is HymnalEvent.SetCurrentSheetMusic -> {
-                    val hymn = _hymnalState.value.currentHymnPair!!
+                    val hymn = _hymnalState.value.currentHymnPair ?: return@launch
                     val resourcedHymn = hymn.copy(first = hymn.first.copy(sheetMusic = event.resources))
                     _hymnalState.update {
                         it.copy(
@@ -347,7 +343,7 @@ class HymnalViewModel(
                         _hymnalState.value.playlists.addAll(playlists)
                         _hymnalState.update { it ->
                             it.copy(
-                                currentHymnal = hymnalList.find { it.fileName == dbSettings.hymnal}!!,
+                                currentHymnal = hymnalList.find { it.fileName == dbSettings.hymnal} ?: return@launch,
                                 isLoadingHymns = false,
                                 settings = _hymnalState.value.settings.copy(fontSize = dbSettings.fontSize),
                             )
@@ -358,7 +354,6 @@ class HymnalViewModel(
 
                 is HymnalEvent.LoadPlaylist -> {
                     CoroutineScope(Dispatchers.IO).launch {
-                        Log.d("playlist","loading playlist")
 //                        _hymnalState.value.currentPlaylistHymns.clear()
                         _hymnalState.value.currentPlaylistPair.clear()
                         val currentPlaylistPlaylistHymns = playlistHymnDao.getPlaylist(event.playlist.id)
@@ -389,7 +384,7 @@ class HymnalViewModel(
                         val playlists = _hymnalState.value.playlists
                         val favoritesPlaylist =
                             _hymnalState.value.playlists.find { it.id == "favorites" }
-                        val currentHymn = _hymnalState.value.currentHymnPair!!
+                        val currentHymn = _hymnalState.value.currentHymnPair ?: return@launch
                         val modifiedHymn = currentHymn.copy(
                             first = currentHymn.first.copy(favorite = !currentHymn.first.favorite)
                         )
@@ -433,9 +428,9 @@ class HymnalViewModel(
                                 // Update playlistHymns list
                                 val playlistHymn = playlistHymns.find {
                                     it.hymnal == currentHymn.first.hymnal.fileName && it.number == currentHymn.first.number
-                                }
+                                } ?: return@launch
                                 if (playlistHymns.remove(playlistHymn)) {
-                                    playlistHymnDao.deletePlaylistHymn(playlistHymn!!)
+                                    playlistHymnDao.deletePlaylistHymn(playlistHymn)
                                 }
 
                                 // Update playlist hymn count
@@ -462,7 +457,6 @@ class HymnalViewModel(
                 }
 
                 is HymnalEvent.LoadHymns -> {
-                    Log.d("loading", "LoadHymns executed ${_hymnalState.value.currentHymnal}")
                     CoroutineScope(Dispatchers.IO).launch {
                         val hymns = hymnDao.getHymnal(_hymnalState.value.currentHymnal.fileName).map(hymnMapper::convertToHymn).toMutableList()
                         _hymnalState.update {
@@ -558,7 +552,6 @@ class HymnalViewModel(
                 }
 
                 is HymnalEvent.ShowSnackbar -> {
-                    Log.d("snack", "showing snack")
                     _hymnalState.value.snackbarHostState.showSnackbar(event.message, withDismissAction = true)
                 }
             }

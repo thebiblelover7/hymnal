@@ -184,6 +184,9 @@ fun MainApplication(context: Context, hymnalViewModel: HymnalViewModel) {
                     },
                     onPlaylistRenameClick = { playlist, name ->
                         hymnalViewModel.onEvent(HymnalEvent.RenamePlaylist(playlist, name))
+                    },
+                    onClickBack = {
+                        navController.navigateUp()
                     }
                 )
             }
@@ -209,7 +212,7 @@ fun MainApplication(context: Context, hymnalViewModel: HymnalViewModel) {
                     onClickBack = {
                         navController.navigateUp()
                     },
-                    playlist = hymnalState.value.currentPlaylist!!,
+                    playlist = hymnalState.value.currentPlaylist ?: return@homeScreen,
                     onRemoveClick = { hymnPair, playlist ->
                         hymnalViewModel.onEvent(HymnalEvent.RemoveHymnFromPlaylist(hymnPair, playlist))
                     },
@@ -249,12 +252,12 @@ fun MainApplication(context: Context, hymnalViewModel: HymnalViewModel) {
                         navController.navigateUp()
                     },
                     fontSize = hymnalState.value.settings.fontSize,
-                    hymn = hymnalState.value.currentHymnPair!!.first,
+                    hymn = hymnalState.value.currentHymnPair?.first ?: return@screen,
 //                    hymnPosition = if (hymnalState.value.isInPlaylist) hymnalState.value.,
                     hymnIndex = if (hymnalState.value.isInPlaylist) {
-                        Pair(hymnalState.value.currentHymnPair!!.second!!.position, hymnalState.value.currentPlaylist!!.count)
+                        Pair(hymnalState.value.currentHymnPair?.second?.position ?: return@screen, hymnalState.value.currentPlaylist?.count ?: return@screen)
                     } else {
-                        Pair(hymnalState.value.currentHymnPair!!.first.number, hymnalState.value.currentHymns.size)
+                        Pair(hymnalState.value.currentHymnPair?.first?.number ?: return@screen, hymnalState.value.currentHymns.size)
                     },
 //                    hymnTotal = hymnalState.value.currentHymns.size,
                     isLyricsScreen = hymnalState.value.isLyricsScreen,
@@ -265,7 +268,7 @@ fun MainApplication(context: Context, hymnalViewModel: HymnalViewModel) {
                                 hymnalViewModel.onEvent(HymnalEvent.SetCurrentHymn(hymnalState.value.currentPlaylistPair[index - 1]))
                             }
                         } else {
-                            val index = hymnalState.value.currentHymns.indexOf(hymnalState.value.currentHymnPair!!.first)
+                            val index = hymnalState.value.currentHymns.indexOf(hymnalState.value.currentHymnPair?.first)
                             if (index != -1 && index > 0) {
                                 hymnalViewModel.onEvent(HymnalEvent.SetCurrentHymn(Pair(hymnalState.value.currentHymns[index - 1], null)))
                             }
@@ -278,7 +281,7 @@ fun MainApplication(context: Context, hymnalViewModel: HymnalViewModel) {
                                 hymnalViewModel.onEvent(HymnalEvent.SetCurrentHymn(hymnalState.value.currentPlaylistPair[index + 1]))
                             }
                         } else {
-                            val index = hymnalState.value.currentHymns.indexOf(hymnalState.value.currentHymnPair!!.first)
+                            val index = hymnalState.value.currentHymns.indexOf(hymnalState.value.currentHymnPair?.first)
                             if (index != -1 && index < hymnalState.value.currentHymns.size - 1) {
                                 hymnalViewModel.onEvent(HymnalEvent.SetCurrentHymn(Pair(hymnalState.value.currentHymns[index + 1], null)))
                             }
@@ -310,10 +313,11 @@ fun MainApplication(context: Context, hymnalViewModel: HymnalViewModel) {
                     onNavClick = {},
                     playlists = hymnalState.value.playlists,
                     onPlaylistClick = { playlist ->
-                        if (hymnalState.value.currentHymnPair != null) {
+                        val currentHymnPair = hymnalState.value.currentHymnPair
+                        if (currentHymnPair != null) {
                             hymnalViewModel.onEvent(
                                 HymnalEvent.AddHymnToPlaylist(
-                                    hymnPair = hymnalState.value.currentHymnPair!!,
+                                    hymnPair = currentHymnPair,
                                     playlist = playlist
                                 )
                             )
@@ -329,42 +333,11 @@ fun MainApplication(context: Context, hymnalViewModel: HymnalViewModel) {
                     },
                     onPlaylistRenameClick = { playlist, name ->
                         hymnalViewModel.onEvent(HymnalEvent.RenamePlaylist(playlist, name))
+                    },
+                    onClickBack = {
+                        navController.navigateUp()
                     }
                 )
-            }
-            screen(
-                screenObject = NavigationScreens.SheetMusic,
-                hymnalViewModel = hymnalViewModel
-            ) {
-                //                SheetMusicScreen(
-//                    onClickBack = {
-//                        navController.navigateUp()
-//                    },
-//                    hymn = hymn,
-//                    hymnTotal = hymnalState.value.currentHymns.size,
-//                    isLyricsScreen = hymnalState.value.currentScreen == NavigationScreens.Hymn,
-//                    onPreviousHymnClick = {
-//                        val hymn = hymnalState.value.currentHymns.find { it.number == hymnalState.value.currentHymn!!.number - 1 }
-//                        if (hymn != null) {
-//                            hymnalViewModel.onEvent(HymnalEvent.SetCurrentHymn(hymn))
-//                        }
-//                    },
-//                    onNextHymnClick = {
-//                        val hymn = hymnalState.value.currentHymns.find { it.number == hymnalState.value.currentHymn!!.number + 1 }
-//                        if (hymn != null) {
-//                            hymnalViewModel.onEvent(HymnalEvent.SetCurrentHymn(hymn))
-//                        }
-//                    },
-//                    onSheetMusicClick = {
-//                        navController.navigate(NavigationScreens.SheetMusic)
-//                    },
-//                    onLyricsClick = {
-//                        navController.navigateUp()
-//                    },
-//                    onFavoriteClick = {
-//                        hymnalViewModel.onEvent(HymnalEvent.SetFavorite)
-//                    }
-//                )
             }
         }
     }

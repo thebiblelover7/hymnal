@@ -57,6 +57,7 @@ import org.sda.hymnal.data.playlist.PlaylistHymn
 fun PlaylistsScreen(
     snackbarHost: @Composable () -> Unit,
     currentScreen: Screen,
+    onClickBack: () -> Unit,
     onNavClick: (screen: Screen) -> Unit,
     playlists: MutableList<Playlist>,
     onPlaylistClick: (playlist: Playlist) -> Unit,
@@ -70,6 +71,14 @@ fun PlaylistsScreen(
     Scaffold(
         snackbarHost = snackbarHost,
         modifier = Modifier.fillMaxSize(),
+        topBar = {
+            if (currentScreen == NavigationScreens.PlaylistSelector) {
+                HymnalTopBar(
+                    title = stringResource(R.string.add_to_playlist),
+                    onClickBack = onClickBack
+                )
+            }
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {createPlaylistDialog = true}
@@ -130,7 +139,12 @@ fun PlaylistsScreen(
                     //                contentPadding = padding,
                     state = listState
                 ) {
-                    items(playlists) { playlist ->
+                    items(playlists) { rawPlaylist ->
+                        val playlist = if (rawPlaylist.id == "favorites") {
+                            rawPlaylist.copy(
+                                name = stringResource(R.string.favorites)
+                            )
+                        } else {rawPlaylist}
                         PlaylistItem(
                             playlist = playlist,
                             onPlaylistClick = onPlaylistClick,
@@ -206,7 +220,7 @@ fun PlaylistHymnsScreen(
         },
         topBar = {
             HymnalTopBar(
-                title = "Playlist - " + playlist.name,
+                title = stringResource(R.string.playlist_hymns, playlist.name),
                 onClickBack = onClickBack
             )
         }
@@ -344,18 +358,20 @@ fun PlaylistItem(
                 )
             )
         }
-        Column(
-            modifier = Modifier
-                .weight(1f)
-        ) {
-            PlaylistDropdownMenu (
-                onDeleteClick = {
-                    onDeleteClick(playlist)
-                },
-                onPlaylistRenameClick = {
-                    onPlaylistRenameClick(playlist)
-                }
-            )
+        if (playlist.id != "favorites") {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                PlaylistDropdownMenu(
+                    onDeleteClick = {
+                        onDeleteClick(playlist)
+                    },
+                    onPlaylistRenameClick = {
+                        onPlaylistRenameClick(playlist)
+                    }
+                )
+            }
         }
     }
 }
@@ -429,12 +445,15 @@ fun PlaylistHymnListItem(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val showMoveUp = if (hymnPair.second?.playlist != "favorites") {index.first > 1} else {false}
+            val showMoveDown = if (hymnPair.second?.playlist != "favorites") {index.first < index.second} else {false}
             PlaylistHymnDropdownMenu (
                 onRemoveClick = onRemoveClick,
                 onMoveClick = { moveBy ->
                     onMoveClick(moveBy)
                 },
-                index = index
+                showMoveUp = showMoveUp,
+                showMoveDown = showMoveDown
             )
         }
     }
@@ -444,7 +463,8 @@ fun PlaylistHymnListItem(
 fun PlaylistHymnDropdownMenu(
     onRemoveClick: () -> Unit,
     onMoveClick: (moveBy: Int) -> Unit,
-    index: Pair<Int, Int>
+    showMoveUp: Boolean,
+    showMoveDown: Boolean
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
@@ -464,7 +484,7 @@ fun PlaylistHymnDropdownMenu(
                     expanded = false
                 }
             )
-            if (index.first > 1) {
+            if (showMoveUp) {
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.playlist_move_up)) },
                     onClick = {
@@ -473,7 +493,7 @@ fun PlaylistHymnDropdownMenu(
                     }
                 )
             }
-            if (index.first < index.second) {
+            if (showMoveDown) {
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.playlist_move_down)) },
                     onClick = {
