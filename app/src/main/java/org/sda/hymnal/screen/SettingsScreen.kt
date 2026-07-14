@@ -60,7 +60,7 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(padding),
-            verticalArrangement = Arrangement.Center,
+//            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -70,11 +70,10 @@ fun SettingsScreen(
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Image(
+                    Icon(
                         painter = painterResource(R.drawable.logo_monochrome),
                         contentDescription = stringResource(R.string.icon_logo),
-                        contentScale = ContentScale.FillWidth,
-                        modifier = Modifier.width(128.dp)
+                        modifier = Modifier.size(196.dp)
                     )
                     Text(
                         text = stringResource(R.string.app_title),
