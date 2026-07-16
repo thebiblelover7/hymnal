@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Гимны</string>
+    <string name="app_name">Adore Hymnal</string>
     <string name="home_open">Открыть</string>
     <string name="icon_dropdown_arrow">стрелка выпадающего списка</string>
     <string name="hymn">Гимн</string>
