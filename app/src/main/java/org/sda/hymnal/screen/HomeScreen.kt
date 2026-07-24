@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -68,8 +69,9 @@ fun HomeScreen(
     ) { padding ->
         Column(
             modifier = Modifier
-                .imePadding()
                 .padding(padding)
+                .consumeWindowInsets(padding)
+                .imePadding()
                 .fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -144,6 +146,7 @@ fun HomeScreen(
             }
             Row(
                 modifier = Modifier.weight(1f)
+                    .requiredHeight(56.dp)
             ) {
                 HymnalDropdown(
                     currentHymnal = currentHymnal,

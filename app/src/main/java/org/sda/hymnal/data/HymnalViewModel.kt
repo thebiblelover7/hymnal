@@ -114,7 +114,6 @@ class HymnalViewModel(
 
                 is HymnalEvent.AddHymnToPlaylist -> {
                     CoroutineScope(Dispatchers.IO).launch {
-                        val toAdd = true        // TODO allow removal
                         val playlists = _hymnalState.value.playlists
                         val playlist = event.playlist
                         val currentHymn = event.hymnPair.first
@@ -130,50 +129,28 @@ class HymnalViewModel(
                                 )))
                             return@launch
                         }
-                        if (toAdd) {    // to be added
-                            // Update playlistHymns list
-                            val position = if (currentPlaylistPlaylistHymns.isNotEmpty()) {currentPlaylistPlaylistHymns.last().position + 1} else { 1 }
-                            val playlistHymnToAdd = PlaylistHymn(
-                                id = Uuid.generateV7().toString(),
-                                hymnal = currentHymn.hymnal.fileName,
-                                number = currentHymn.number,
-                                playlist = playlist.id,
-                                position = position
+                        // Update playlistHymns list
+                        val position = if (currentPlaylistPlaylistHymns.isNotEmpty()) {currentPlaylistPlaylistHymns.last().position + 1} else { 1 }
+                        val playlistHymnToAdd = PlaylistHymn(
+                            id = Uuid.generateV7().toString(),
+                            hymnal = currentHymn.hymnal.fileName,
+                            number = currentHymn.number,
+                            playlist = playlist.id,
+                            position = position
+                        )
+                        currentPlaylistPlaylistHymns.add(playlistHymnToAdd)
+                        playlistHymnDao.upsertPlaylistHymn(playlistHymnToAdd)
+                        _hymnalState.value.currentPlaylistHymns.add(currentHymn)
+
+                        // Update playlist hymn count
+                        val updatedPlaylist = playlist.copy(count = playlist.count + 1)
+                        playlists[playlists.indexOf(playlist)] = updatedPlaylist
+                        playlistDao.upsertPlaylist(updatedPlaylist)
+                        _hymnalState.update {
+                            it.copy(
+                                playlists = playlists,
+                                currentPlaylistPlaylistHymns = currentPlaylistPlaylistHymns
                             )
-                            currentPlaylistPlaylistHymns.add(playlistHymnToAdd)
-                            playlistHymnDao.upsertPlaylistHymn(playlistHymnToAdd)
-                            _hymnalState.value.currentPlaylistHymns.add(currentHymn)
-
-                            // Update playlist hymn count
-                            val updatedPlaylist = playlist.copy(count = playlist.count + 1)
-                            playlists[playlists.indexOf(playlist)] = updatedPlaylist
-                            playlistDao.upsertPlaylist(updatedPlaylist)
-                            _hymnalState.update {
-                                it.copy(
-                                    playlists = playlists,
-                                    currentPlaylistPlaylistHymns = currentPlaylistPlaylistHymns
-                                )
-                            }
-                        } else {                        // to be removed
-                            // Update playlistHymns list
-                            val playlistHymn = currentPlaylistPlaylistHymns.find {
-                                it.hymnal == currentHymn.hymnal.fileName && it.number == currentHymn.number
-                            } ?: return@launch
-                            if (currentPlaylistPlaylistHymns.remove(playlistHymn)) {
-                                playlistHymnDao.deletePlaylistHymn(playlistHymn)
-                            }
-                            _hymnalState.value.currentPlaylistHymns.remove(event.hymnPair.first)
-
-                            // Update playlist hymn count
-                            val updatedPlaylist = playlist.copy(count = playlist.count - 1)
-                            playlists[playlists.indexOf(playlist)] = updatedPlaylist
-                            playlistDao.upsertPlaylist(updatedPlaylist)
-                            _hymnalState.update {
-                                it.copy(
-                                    playlists = playlists,
-                                    currentPlaylistPlaylistHymns = currentPlaylistPlaylistHymns
-                                )
-                            }
                         }
                         onEvent(HymnalEvent.ShowSnackbar(
                             applicationContext.getString(
@@ -512,6 +489,14 @@ class HymnalViewModel(
                     _hymnalState.update {
                         it.copy(
                             isLyricsScreen = event.isLyricsScreen
+                        )
+                    }
+                }
+
+                is HymnalEvent.SetSearchActive -> {
+                    _hymnalState.update {
+                        it.copy(
+                            isSearchActive = event.isSearchActive
                         )
                     }
                 }

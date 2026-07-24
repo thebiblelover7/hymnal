@@ -27,6 +27,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -144,8 +145,11 @@ fun MainApplication(hymnalViewModel: HymnalViewModel) {
                     hymns = hymnalState.value.currentHymns.map { hymn ->
                         Pair(hymn, null)
                     }.toMutableList(),
+                    isSearchActive = hymnalState.value.isSearchActive,
+                    setSearchActive = {
+                        hymnalViewModel.onEvent(HymnalEvent.SetSearchActive(it))
+                    },
                     searchQuery = hymnalState.value.currentSearchString,
-                    isPerformingSearch = hymnalState.value.isPerformingSearch,
                     onSearchChange = { query ->
                         hymnalViewModel.onEvent(HymnalEvent.SetSearchString(query))
                     },
@@ -444,12 +448,14 @@ fun BottomHymnalBar(
 @Composable
 fun HymnalTopBar(
     title: String,
-    onClickBack: () -> Unit
+    onClickBack: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     TopAppBar(
         title = {
             Text(title)
         },
+        scrollBehavior = scrollBehavior,
         navigationIcon = {
             IconButton(
                 onClick = onClickBack

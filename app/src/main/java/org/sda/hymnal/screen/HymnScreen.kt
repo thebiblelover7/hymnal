@@ -1,6 +1,7 @@
 package org.sda.hymnal.screen
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -25,16 +26,27 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Lyrics
 import androidx.compose.material.icons.filled.Piano
 import androidx.compose.material3.AppBarRow
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.FloatingToolbarExitDirection
+import androidx.compose.material3.FloatingToolbarScrollBehavior
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -49,6 +61,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import kotlinx.coroutines.launch
+import me.saket.telephoto.zoomable.ZoomSpec
+import me.saket.telephoto.zoomable.ZoomableContentLocation
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
 import org.sda.hymnal.HymnalTopBar
@@ -57,7 +72,7 @@ import org.sda.hymnal.data.hymn.Hymn
 import org.sda.hymnal.data.hymn.hymnTags
 
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HymnScreen(
     snackbarHost: @Composable () -> Unit,
@@ -65,7 +80,6 @@ fun HymnScreen(
     fontSize: Float,
     hymn: Hymn,
     hymnIndex: Pair<Int, Int>,
-//    hymnTotal: Int,
     onPreviousHymnClick: () -> Unit,
     onNextHymnClick: () -> Unit,
     isLyricsScreen: Boolean,        // False if sheet music is shown
@@ -74,13 +88,20 @@ fun HymnScreen(
     onPlaylistAddClick: () -> Unit,
     onLyricsClick: () -> Unit
 ) {
+    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val bottomBarScrollBehavior = FloatingToolbarDefaults.exitAlwaysScrollBehavior(
+        FloatingToolbarExitDirection.Bottom)
     Scaffold(
         snackbarHost = snackbarHost,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+            .nestedScroll(bottomBarScrollBehavior),
         topBar = {
             HymnalTopBar(
                 title = stringResource(R.string.hymn) + " "+ hymn.number.toString(),
-                onClickBack = onClickBack
+                onClickBack = onClickBack,
+                scrollBehavior = topAppBarScrollBehavior
             )
         },
         bottomBar = {
@@ -90,16 +111,16 @@ fun HymnScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
         ) {
             HymnScreenBottomBar(
                 hymn = hymn,
-//                hymnTotal = hymnTotal,
                 hymnIndex = hymnIndex,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .offset(y = -FloatingToolbarDefaults.ScreenOffset)
+                    .padding(8.dp)
                     .zIndex(1f),
+                floatingToolbarScrollBehavior = bottomBarScrollBehavior,
                 isLyricsScreen = isLyricsScreen,
                 onPreviousHymnClick = onPreviousHymnClick,
                 onNextHymnClick = onNextHymnClick,
@@ -128,7 +149,8 @@ fun HymnScreen(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .verticalScroll(rememberScrollState())
-                                .padding(24.dp),
+                                .padding(24.dp)
+                                .padding(padding),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -195,22 +217,76 @@ fun HymnScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
-//                                .zoomable(rememberZoomableState())
-//                                .verticalScroll(rememberScrollState())
-//                                .padding(bottom = 64.dp + padding.calculateBottomPadding())
+                                .padding(padding)
                         ) {
                             HorizontalPager(
                                 state = pagerState,
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+                                    .nestedScroll(bottomBarScrollBehavior)
                             ) { page ->
                                 val resource = hymn.sheetMusic[page]
                                 if (resource != 0) {
+                                    val painter = painterResource(resource)
+                                    val zoomableState = rememberZoomableState(
+                                        zoomSpec = ZoomSpec(maxZoomFactor = 4f)
+                                    ).apply {
+                                        setContentLocation(
+                                            ZoomableContentLocation.scaledInsideAndCenterAligned(painter.intrinsicSize)
+                                        )
+                                    }
+                                    var showToolbar by remember { mutableStateOf(true) }
+                                    LaunchedEffect(zoomableState.zoomFraction) {
+                                        snapshotFlow { zoomableState.zoomFraction }
+                                            .collect { fraction ->
+                                                val isZoomed = (fraction ?: -1f) > 0f
+                                                showToolbar = !isZoomed
+                                            }
+                                    }
+                                    LaunchedEffect(showToolbar) {
+                                        snapshotFlow { showToolbar }.collect { showToolbar ->
+                                            val targetBottomOffset = if (showToolbar) {
+                                                0f
+                                            } else {
+                                                bottomBarScrollBehavior.state.offsetLimit
+                                            }
+                                            val targetTopOffset = if (showToolbar) {
+                                                0f
+                                            } else {
+                                                topAppBarScrollBehavior.state.heightOffsetLimit
+                                            }
+                                            launch {
+                                                animate(
+                                                    initialValue = bottomBarScrollBehavior.state.offset,
+                                                    targetValue = targetBottomOffset
+                                                ) { value, _ ->
+                                                    bottomBarScrollBehavior.state.offset = value
+                                                }
+                                            }
+                                            launch {
+                                                animate(
+                                                    initialValue = topAppBarScrollBehavior.state.heightOffset,
+                                                    targetValue = targetTopOffset
+                                                ) { value, _ ->
+                                                    topAppBarScrollBehavior.state.heightOffset =
+                                                        value
+                                                }
+                                            }
+                                        }
+                                    }
                                     Image(
                                         painter = painterResource(resource),
                                         contentDescription = stringResource(R.string.icon_sheet_music),
-                                        contentScale = ContentScale.FillWidth,
+                                        alignment = Alignment.Center,
+                                        contentScale = ContentScale.Inside,
                                         modifier = Modifier
-                                            .zoomable(rememberZoomableState())
+                                            .zoomable(
+                                                state = zoomableState,
+                                                onClick = {
+                                                    showToolbar = !showToolbar
+                                                }
+                                            )
                                             .fillMaxSize()
                                     )
                                 }
@@ -227,9 +303,9 @@ fun HymnScreen(
 @Composable
 fun HymnScreenBottomBar(
     hymn: Hymn,
-//    hymnTotal: Int,
     hymnIndex: Pair<Int, Int>,
     modifier: Modifier,
+    floatingToolbarScrollBehavior: FloatingToolbarScrollBehavior? = null,
     isLyricsScreen: Boolean,
     onPreviousHymnClick: () -> Unit,
     onNextHymnClick: () -> Unit,
@@ -240,6 +316,7 @@ fun HymnScreenBottomBar(
 ) {
     HorizontalFloatingToolbar(
         modifier = modifier,
+        scrollBehavior = floatingToolbarScrollBehavior,
         content = {
             val strPrevHymn = stringResource(R.string.previous_hymn)
             val strNextHymn = stringResource(R.string.next_hymn)
@@ -290,19 +367,6 @@ fun HymnScreenBottomBar(
                     },
                     label = strFavorite
                 )
-//                clickableItem(
-//                    onClick = onFavoriteClick,
-//                    icon = {
-//                        AnimatedContent(hymn.favorite) { favorite ->
-//                            if (favorite) {
-//                                Icon(Icons.Filled.Favorite, contentDescription = stringResource(R.string.icon_favorite))
-//                            } else {
-//                                Icon(Icons.Filled.FavoriteBorder, contentDescription = stringResource(R.string.icon_favorite))
-//                            }
-//                        }
-//                    },
-//                    label = strFavorite
-//                )
                 clickableItem(
                     onClick = onPlaylistAddClick,
                     icon = {

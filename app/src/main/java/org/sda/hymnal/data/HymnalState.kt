@@ -28,6 +28,7 @@ data class HymnalState(
     val isLoadingHymns: Boolean = true,
     val isSearching: Boolean = false,
     val isPerformingSearch: Boolean = false,
+    val isSearchActive: Boolean = false,
     val currentSearchNumber: String = "",
     val currentSearchHymn: Hymn? = null,
     val currentSearchString: MutableStateFlow<String> = MutableStateFlow(""),
