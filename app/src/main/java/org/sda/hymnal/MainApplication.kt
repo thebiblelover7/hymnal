@@ -151,7 +151,7 @@ fun MainApplication(hymnalViewModel: HymnalViewModel) {
                     },
                     searchQuery = hymnalState.value.currentSearchString,
                     onSearch = { query ->
-                        hymnalViewModel.onEvent(HymnalEvent.PerformSearch)
+                        hymnalViewModel.onEvent(HymnalEvent.PerformSearch(query))
                     },
                     onSearchChange = { query ->
                         hymnalViewModel.onEvent(HymnalEvent.SetSearchString(query))

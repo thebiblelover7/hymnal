@@ -24,7 +24,7 @@ sealed interface HymnalEvent {
     data class SetLoadingHymns(val isLoadingHymns: Boolean): HymnalEvent
     data class SetCurrentHymnal(val hymnal: Hymnal): HymnalEvent
     data class SetFontSize(val fontSize: Float): HymnalEvent
-    object PerformSearch: HymnalEvent
+    data class PerformSearch(val query: String): HymnalEvent
     data class SetSearchActive(val isSearchActive: Boolean): HymnalEvent
     data class EnableSearch(val isSearching: Boolean): HymnalEvent
     data class SetSearchNumber(val searchNumber: String): HymnalEvent

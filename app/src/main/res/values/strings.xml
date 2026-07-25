@@ -37,7 +37,7 @@
     <string name="hymn_added_to_playlist">Hymn added to playlist %1$s</string>
     <string name="delete_playlist">Delete Playlist</string>
     <string name="playlist_name">Name</string>
-    <string name="dialog_close">Dismiss</string>
+    <string name="dialog_close">Cancel</string>
     <string name="dialog_add">Add</string>
     <string name="dialog_rename">Rename</string>
     <string name="rename_playlist">Rename playlist</string>
@@ -49,4 +49,5 @@
     <string name="hymn_added_to_favorites">Hymn added to favorites</string>
     <string name="hymn_removed_from_favorites">Hymn removed from favorites</string>
     <string name="hymn_removed_from_playlist">Hymn removed from playlist %1$s</string>
+    <string name="playlist_create">Create Playlist</string>
 </resources>

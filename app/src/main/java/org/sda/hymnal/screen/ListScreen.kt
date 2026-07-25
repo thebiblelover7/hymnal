@@ -1,42 +1,57 @@
 package org.sda.hymnal.screen
 
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AppBarWithSearch
+import androidx.compose.material3.ExpandedFullScreenContainedSearchBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberContainedSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import my.nanihadesuka.compose.LazyColumnScrollbar
 import my.nanihadesuka.compose.ScrollbarSettings
 import org.sda.hymnal.BottomHymnalBar
@@ -46,7 +61,9 @@ import org.sda.hymnal.data.hymn.hymnTags
 import org.sda.hymnal.data.playlist.PlaylistHymn
 import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
+    FlowPreview::class
+)
 @Composable
 fun ListScreen(
     currentScreen: Screen,
@@ -66,78 +83,93 @@ fun ListScreen(
         delay(300.milliseconds)
         onSearch(query.value)
     }
+    val scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
+    val textFieldState = rememberTextFieldState()
+    LaunchedEffect(textFieldState) {
+        snapshotFlow { textFieldState.text }
+            .debounce(300.milliseconds)
+            .distinctUntilChanged()
+            .collect { query ->
+                onSearch(query.toString())
+            }
+    }
+    val searchState = rememberContainedSearchBarState()
+    val inputField =
+        @Composable {
+            SearchBarDefaults.InputField(
+                textFieldState = textFieldState,
+                searchBarState = searchState,
+                onSearch = {
+                    onSearch(it)
+                    Log.d("search", "searching: $it")
+                },
+                placeholder = {
+                    Text(stringResource(R.string.search_hymns))
+                },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = stringResource(R.string.icon_search)
+                    )
+                },
+                trailingIcon = {
+                    if (isSearchActive) {
+                        IconButton(
+                            onClick = {
+                                if (query.value.isNotEmpty()) onSearchChange("") else setSearchActive(false)
+                            }
+                        ) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = stringResource(
+                                    R.string.icon_clear
+                                )
+                            )
+                        }
+                    }
+                }
+            )
+        }
     Scaffold(
         snackbarHost = snackbarHost,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .fillMaxSize(),
         topBar = {
-            val colors1 = SearchBarDefaults.colors()
-            Box(
-                modifier = Modifier.fillMaxWidth()
+            AppBarWithSearch(
+                state = searchState,
+                scrollBehavior = scrollBehavior,
+                inputField = inputField,
+            )
+            ExpandedFullScreenContainedSearchBar(
+                state = searchState,
+                inputField = inputField
+
             ) {
-                SearchBar(
-                    inputField = {
-                        SearchBarDefaults.InputField(
-                            query = query.value,
-                            onQueryChange = { onSearchChange(it) },
-                            expanded = isSearchActive,
-                            onExpandedChange = setSearchActive,
-                            onSearch = onSearch,
-                            modifier = Modifier,
-                            placeholder = {
-                                Text(stringResource(R.string.search_hymns))
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    Icons.Default.Search,
-                                    contentDescription = stringResource(R.string.icon_search)
-                                )
-                            },
-                            trailingIcon = {
-                                if (isSearchActive) {
-                                    IconButton(
-                                        onClick = {
-                                            if (query.value.isNotEmpty()) onSearchChange("") else setSearchActive(false)
-                                        }
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Close,
-                                            contentDescription = stringResource(
-                                                R.string.icon_clear
-                                            )
-                                        )
-                                    }
-                                }
-                            },
-                        )
-                    },
-                    expanded = isSearchActive,
-                    onExpandedChange = setSearchActive,
-                    modifier = Modifier
-                        .align(Alignment.Center),
-                    //                    .fillMaxWidth(),
-                    //                    .background(MaterialTheme.colorScheme.background),
-                    //                    .padding(horizontal = 12.dp),
-                    shape = SearchBarDefaults.inputFieldShape,
-                    colors = colors1,
-                    tonalElevation = SearchBarDefaults.TonalElevation,
-                    shadowElevation = SearchBarDefaults.ShadowElevation,
-                    windowInsets = SearchBarDefaults.windowInsets,
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
                 ) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(searchResults) { hymn ->
-                            HymnListItem(Pair(hymn, null), onHymnClick)
-                        }
+                    items(searchResults, key = {"${it.number} ${it.hymnal.fileName}"}) { hymn ->
+                        HymnListItem(
+                            hymnPair = Pair(hymn, null),
+                            modifier = Modifier.animateItem()
+                                .clickable(onClick = {onHymnClick(Pair(hymn, null))}),
+                        )
                     }
                 }
             }
         },
         bottomBar = {
-            BottomHymnalBar(
-                currentScreen = currentScreen,
-                onNavClick = onNavClick,
-            )
+            AnimatedVisibility(
+                visible = !isSearchActive,
+                enter = slideInVertically(),
+                exit = slideOutVertically()
+            ) {
+                BottomHymnalBar(
+                    currentScreen = currentScreen,
+                    onNavClick = onNavClick,
+                )
+            }
         }
     ) { padding ->
         val listState = rememberLazyListState()
@@ -148,66 +180,63 @@ fun ListScreen(
                 thumbUnselectedColor = MaterialTheme.colorScheme.secondary.copy(0.5f),
                 thumbSelectedColor = MaterialTheme.colorScheme.secondary
             ),
-//            indicatorContent = { index, isThumbSelected ->
-//                Text(
-//                    text = "i: $index",
-//                    Modifier.background(if (isThumbSelected) Color.Red else Color.Black, CircleShape)
-//                )
-//            }
+            indicatorContent = { index, isThumbSelected ->
+                AnimatedVisibility(
+                    enter = fadeIn() + slideInHorizontally(initialOffsetX = {it / 2}),
+                    exit = fadeOut() + slideOutHorizontally(targetOffsetX = {it / 2}),
+                    visible = isThumbSelected,
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                ) {
+                    Text(
+                        text = "${hymns[index].first.number}",
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        modifier = Modifier.background(
+                            color = MaterialTheme.colorScheme.secondary.copy(0.8f),
+                            shape = CircleShape
+                        )
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                    )
+                }
+
+            }
         ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize(),
                 contentPadding = PaddingValues(vertical = 10.dp),
-//                contentPadding = padding,
                 state = listState
             ) {
                 items(hymns) { hymn ->
-                    HymnListItem(hymn, onHymnClick)
+                    HymnListItem(
+                        hymnPair = hymn,
+                        modifier = Modifier.animateItem()
+                            .clickable(onClick = {onHymnClick(hymn)}),
+                    )
                 }
             }
         }
     }
 }
 
-
 @Composable
 fun HymnListItem(
-//    hymn: Hymn,
     hymnPair: Pair<Hymn, PlaylistHymn?>,
-    onHymnClick: (hymnPair: Pair<Hymn, PlaylistHymn?>) -> Unit
+    modifier: Modifier,
+    trailingContent: @Composable () -> Unit = { },
 ) {
     val regex = Regex("(${hymnTags.joinToString(separator = "|")})\n")
-    Row(
-        modifier = Modifier
-            .clickable(
-                enabled = true,
-                onClick = { onHymnClick(hymnPair) }
-            )
-            .padding(vertical = 0.dp, horizontal = 5.dp),
-//            .height(64.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(
-            modifier = Modifier
-                .defaultMinSize(minWidth = 80.dp)
-                .padding(horizontal = 20.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    ListItem(
+        modifier = modifier,
+        leadingContent = {
             Text(
                 text = hymnPair.first.number.toString(),
                 fontWeight = FontWeight.SemiBold,
-                fontSize = 24.sp
+                fontSize = 24.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.defaultMinSize(minWidth = 50.dp)
             )
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 10.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
-        ) {
+        },
+        headlineContent = {
             Text(
                 text = hymnPair.first.title,
                 maxLines = 1,
@@ -215,6 +244,8 @@ fun HymnListItem(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )
+        },
+        supportingContent = {
             val shortTextLine = hymnPair.first.text.take(50)
                 .replace(regex = regex, replacement = "")
             Text(
@@ -226,6 +257,7 @@ fun HymnListItem(
                     alpha = 0.8f
                 )
             )
-        }
-    }
+        },
+        trailingContent = trailingContent
+    )
 }

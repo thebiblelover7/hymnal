@@ -35,7 +35,7 @@ interface HymnDao {
     suspend fun searchBMHymns(
         query: String,
         hymnal: String,
-        scoreThreshold: Double = -5.0
+        scoreThreshold: Double = -1.0
     ): MutableList<DbHymn>
     @Update
     suspend fun setHymn(dbHymn: DbHymn)
