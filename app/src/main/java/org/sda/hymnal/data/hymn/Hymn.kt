@@ -1,19 +1,16 @@
 package org.sda.hymnal.data.hymn
 
 import android.content.Context
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.ProvidedTypeConverter
-import androidx.room.TypeConverter
+import androidx.room3.ColumnInfo
+import androidx.room3.Entity
+import androidx.room3.Fts5
 import kotlinx.serialization.json.Json
 import org.sda.hymnal.data.hymnal.Hymnal
 import org.sda.hymnal.data.hymnal.hymnalList
 
-@ProvidedTypeConverter
 class HymnConverter(
     private val context: Context
 ) {
-    @TypeConverter
     fun convertToHymn(dbHymn: DbHymn): Hymn {
         val sheetsStr: List<String> = Json.decodeFromString(dbHymn.sheetMusic)
         val sheetsInt = sheetsStr.map { sheetPath ->
@@ -35,7 +32,6 @@ class HymnConverter(
         )
     }
 
-    @TypeConverter
     fun convertToDbHymn(hymn: Hymn): DbHymn {
         return DbHymn(
             hymnal = hymn.hymnal.fileName,
@@ -71,5 +67,17 @@ data class DbHymn(
     val title: String,
     val favorite: Boolean,
     @ColumnInfo(name = "sheet_music") val sheetMusic: String,
+    val text: String
+)
+
+@Entity(tableName = "hymns_fts")
+@Fts5(
+    tokenizer = "trigram",
+    contentEntity = DbHymn::class
+)
+data class DbHymnFTS(
+    @ColumnInfo(name = "title")
+    val title: String,
+    @ColumnInfo(name = "text")
     val text: String
 )

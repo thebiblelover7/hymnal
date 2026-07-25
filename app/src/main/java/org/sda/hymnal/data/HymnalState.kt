@@ -4,7 +4,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import org.sda.hymnal.data.hymn.Hymn
 import org.sda.hymnal.data.hymnal.Hymnal
 import org.sda.hymnal.data.hymnal.Hymnals
@@ -21,7 +20,7 @@ data class HymnalState(
     val currentHymnal: Hymnal = Hymnals.NewEnglish,
     val settings: Settings = Settings(hymnal = Hymnals.NewEnglish.fileName, fontSize = 1f),
     val currentHymns: MutableList<Hymn> = mutableListOf(),
-    val searchedHymns: StateFlow<List<Hymn>> = MutableStateFlow(emptyList()),
+    val searchedHymns: SnapshotStateList<Hymn> = mutableStateListOf(),
     val allHymns: List<Hymn> = emptyList(),
     val isInPlaylist: Boolean = false,
     val isLyricsScreen: Boolean = true,

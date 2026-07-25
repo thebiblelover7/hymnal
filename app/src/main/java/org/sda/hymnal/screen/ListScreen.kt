@@ -25,7 +25,9 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -33,8 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import my.nanihadesuka.compose.LazyColumnScrollbar
 import my.nanihadesuka.compose.ScrollbarSettings
 import org.sda.hymnal.BottomHymnalBar
@@ -42,6 +44,7 @@ import org.sda.hymnal.R
 import org.sda.hymnal.data.hymn.Hymn
 import org.sda.hymnal.data.hymn.hymnTags
 import org.sda.hymnal.data.playlist.PlaylistHymn
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,11 +57,15 @@ fun ListScreen(
     isSearchActive: Boolean,
     setSearchActive: (isSearchActive: Boolean) -> Unit,
     searchQuery: MutableStateFlow<String>,
+    onSearch: (searchQuery: String) -> Unit,
     onSearchChange: (query: String) -> Unit,
-    searchResults: StateFlow<List<Hymn>>,
+    searchResults: SnapshotStateList<Hymn>,
 ) {
     val query = searchQuery.collectAsState()
-    val searchedHymns = searchResults.collectAsState()
+    LaunchedEffect(query.value) {
+        delay(300.milliseconds)
+        onSearch(query.value)
+    }
     Scaffold(
         snackbarHost = snackbarHost,
         modifier = Modifier.fillMaxSize(),
@@ -74,7 +81,7 @@ fun ListScreen(
                             onQueryChange = { onSearchChange(it) },
                             expanded = isSearchActive,
                             onExpandedChange = setSearchActive,
-                            onSearch = {},
+                            onSearch = onSearch,
                             modifier = Modifier,
                             placeholder = {
                                 Text(stringResource(R.string.search_hymns))
@@ -119,7 +126,7 @@ fun ListScreen(
                     LazyColumn(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(searchedHymns.value) { hymn ->
+                        items(searchResults) { hymn ->
                             HymnListItem(Pair(hymn, null), onHymnClick)
                         }
                     }

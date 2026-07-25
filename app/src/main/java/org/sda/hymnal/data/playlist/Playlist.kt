@@ -1,7 +1,7 @@
 package org.sda.hymnal.data.playlist
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 import kotlin.uuid.ExperimentalUuidApi
 
 @Entity(tableName = "playlists")

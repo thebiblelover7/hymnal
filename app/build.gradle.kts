@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "2.2.0"
     id("com.google.devtools.ksp")
-    id("androidx.room")
+    id("androidx.room3")
 }
 
 android {
@@ -18,8 +18,8 @@ android {
         applicationId = "org.sda.hymnal"
         minSdk = 24
         targetSdk = 36
-        versionCode = 6
-        versionName = "0.2.1"
+        versionCode = 7
+        versionName = "0.2.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -42,7 +42,7 @@ android {
     }
 }
 
-room {
+room3 {
     schemaDirectory("$projectDir/schemas")
 }
 
@@ -56,14 +56,16 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.room3.common.jvm)
     implementation(libs.kotlinx.serialization)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.zoomable)
     implementation(libs.lazycolumnscrollbar)
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.sqlite)
     ksp(libs.androidx.room.compiler)
-    implementation(libs.androidx.room.ktx)
+//    implementation(libs.androidx.room.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

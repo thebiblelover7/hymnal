@@ -1,8 +1,8 @@
 package org.sda.hymnal.data.setting
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.ColumnInfo
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 
 @Entity
 data class Settings(

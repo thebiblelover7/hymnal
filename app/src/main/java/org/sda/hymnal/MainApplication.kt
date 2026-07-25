@@ -42,10 +42,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
+import org.sda.hymnal.data.HymnalViewModel
 import org.sda.hymnal.screen.HomeScreen
 import org.sda.hymnal.screen.HymnScreen
 import org.sda.hymnal.screen.HymnalEvent
-import org.sda.hymnal.data.HymnalViewModel
 import org.sda.hymnal.screen.ListScreen
 import org.sda.hymnal.screen.NavigationScreens
 import org.sda.hymnal.screen.PlaylistHymnsScreen
@@ -150,6 +150,9 @@ fun MainApplication(hymnalViewModel: HymnalViewModel) {
                         hymnalViewModel.onEvent(HymnalEvent.SetSearchActive(it))
                     },
                     searchQuery = hymnalState.value.currentSearchString,
+                    onSearch = { query ->
+                        hymnalViewModel.onEvent(HymnalEvent.PerformSearch)
+                    },
                     onSearchChange = { query ->
                         hymnalViewModel.onEvent(HymnalEvent.SetSearchString(query))
                     },
