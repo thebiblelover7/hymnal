@@ -26,6 +26,9 @@ android {
 
     buildTypes {
         release {
+            optimization {
+                enable = true
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
