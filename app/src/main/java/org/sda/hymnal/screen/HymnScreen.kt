@@ -236,7 +236,7 @@ fun HymnScreen(
                                     .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
                                     .nestedScroll(bottomBarScrollBehavior)
                             ) { page ->
-                                val resource = hymn.sheetMusic[page]
+                                val resource = if (page < hymn.sheetMusic.size) hymn.sheetMusic[page] else 0
                                 if (resource != 0) {
                                     val painter = painterResource(resource)
                                     val zoomableState = rememberZoomableState(

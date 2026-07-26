@@ -15,11 +15,7 @@ class HymnConverter(
     fun convertToHymn(dbHymn: DbHymn): Hymn {
         val sheetsStr: List<String> = Json.decodeFromString(dbHymn.sheetMusic)
         val sheetsInt = sheetsStr.map { sheetPath ->
-            context.resources.getIdentifier(
-                sheetPath,
-                "drawable",
-                context.packageName
-            )
+            getSheetMusicResource(sheetPath)
         }
         return Hymn(
             title = dbHymn.title,
