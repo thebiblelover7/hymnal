@@ -18,8 +18,8 @@ android {
         applicationId = "org.sda.hymnal"
         minSdk = 24
         targetSdk = 36
-        versionCode = 9
-        versionName = "0.2.3"
+        versionCode = 10
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
