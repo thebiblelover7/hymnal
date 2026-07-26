@@ -21,4 +21,17 @@ To help with translation of the app into various other languages, visit https://
 
 ## Screenshots
 
-![Image of home screen](docs/img/screenshot-1.png) ![Image of hymn screen](docs/img/screenshot-2.png)
+![Screenshot](docs/screenshots/screenshots_Phone%201.png)
+![Screenshot](docs/screenshots/screenshots_Phone%202.png)
+![Screenshot](docs/screenshots/screenshots_Phone%203.png)
+![Screenshot](docs/screenshots/screenshots_Phone%204.png)
+![Screenshot](docs/screenshots/screenshots_Phone%205.png)
+![Screenshot](docs/screenshots/screenshots_Phone%206.png)
+![Screenshot](docs/screenshots/screenshots_Phone%207.png)
+![Screenshot](docs/screenshots/screenshots_Tablet%201.png)
+![Screenshot](docs/screenshots/screenshots_Tablet%202.png)
+![Screenshot](docs/screenshots/screenshots_Tablet%203.png)
+![Screenshot](docs/screenshots/screenshots_Tablet%204.png)
+![Screenshot](docs/screenshots/screenshots_Tablet%205.png)
+![Screenshot](docs/screenshots/screenshots_Tablet%206.png)
+![Screenshot](docs/screenshots/screenshots_Tablet%207.png)

@@ -255,7 +255,7 @@ fun HymnListItem(
             )
         },
         supportingContent = {
-            val shortTextLine = hymnPair.first.firstLine + TextOverflow.Ellipsis.toString()
+            val shortTextLine = hymnPair.first.firstLine + "…"
             Text(
                 text = shortTextLine,
                 fontSize = 14.sp,
