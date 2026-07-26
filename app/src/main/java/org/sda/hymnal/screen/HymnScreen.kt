@@ -1,6 +1,8 @@
 package org.sda.hymnal.screen
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -8,14 +10,20 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowLeft
@@ -46,6 +54,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -108,6 +117,7 @@ fun HymnScreen(
 
         }
     ) { padding ->
+        val pagerState = rememberPagerState { hymn.sheetMusic.size }
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -127,7 +137,8 @@ fun HymnScreen(
                 onSheetMusicClick = onSheetMusicClick,
                 onFavoriteClick = onFavoriteClick,
                 onPlaylistAddClick = onPlaylistAddClick,
-                onLyricsClick = onLyricsClick
+                onLyricsClick = onLyricsClick,
+                pagerState = pagerState
             )
             AnimatedContent(isLyricsScreen) { isLyricsScreen ->
                 if (isLyricsScreen) {
@@ -213,7 +224,6 @@ fun HymnScreen(
                         contentKey = { it.second.first }
                     ) { statePair ->
                         val hymn = statePair.first
-                        val pagerState = rememberPagerState { hymn.sheetMusic.size }
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -312,7 +322,8 @@ fun HymnScreenBottomBar(
     onSheetMusicClick: () -> Unit,
     onFavoriteClick: () -> Unit,
     onPlaylistAddClick: () -> Unit,
-    onLyricsClick: () -> Unit
+    onLyricsClick: () -> Unit,
+    pagerState: PagerState
 ) {
     HorizontalFloatingToolbar(
         modifier = modifier,
@@ -324,76 +335,113 @@ fun HymnScreenBottomBar(
             val strPlaylistAdd = stringResource(R.string.add_to_playlist)
             val strSheetMusic = stringResource(R.string.sheet_music)
             val strLyrics = stringResource(R.string.lyrics)
-            AppBarRow {
-                clickableItem(
-                    onClick = onPreviousHymnClick,
-                    icon = {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowLeft,
-                            contentDescription = stringResource(R.string.icon_left_arrow)
-                        )
-                    },
-                    label = strPrevHymn,
-                    enabled = hymnIndex.first > 1
-                )
-                clickableItem(
-                    onClick = onNextHymnClick,
-                    icon = {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowRight,
-                            contentDescription = stringResource(R.string.icon_right_arrow)
-                        )
-                    },
-                    label = strNextHymn,
-                    enabled = hymnIndex.first < hymnIndex.second
-                )
-                toggleableItem(
-                    checked = hymn.favorite,
-                    onCheckedChange = { onFavoriteClick() },
-                    icon = {
-                        AnimatedContent(hymn.favorite) { favorite ->
-                            if (favorite) {
-                                Icon(
-                                    Icons.Filled.Favorite,
-                                    contentDescription = stringResource(R.string.icon_favorite)
-                                )
-                            } else {
-                                Icon(
-                                    Icons.Filled.FavoriteBorder,
-                                    contentDescription = stringResource(R.string.icon_favorite)
-                                )
-                            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AnimatedVisibility(
+                    visible = pagerState.pageCount > 0 && !isLyricsScreen
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        repeat(pagerState.pageCount) { iteration ->
+                            val animatedColor = animateColorAsState(if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
+                            Box(
+                                modifier = Modifier
+                                    .padding(2.dp)
+                                    .clip(CircleShape)
+                                    .background(animatedColor.value)
+                                    .size(6.dp)
+                            )
                         }
-                    },
-                    label = strFavorite
-                )
-                clickableItem(
-                    onClick = onPlaylistAddClick,
-                    icon = {
-                        Icon(Icons.AutoMirrored.Filled.PlaylistAdd, contentDescription = stringResource(R.string.icon_add_to_playlist))
-                    },
-                    label = strPlaylistAdd
-                )
-                clickableItem(
-                    onClick = if (isLyricsScreen) {onSheetMusicClick} else {onLyricsClick},
-                    icon = {
-                        AnimatedContent(isLyricsScreen) { isLyricsScreen ->
-                            if (isLyricsScreen) {
-                                Icon(
-                                    Icons.Default.Piano,
-                                    contentDescription = stringResource(R.string.icon_music_note)
-                                )
-                            } else {
-                                Icon(
-                                    Icons.Default.Lyrics,
-                                    contentDescription = stringResource(R.string.lyrics)
-                                )
+                    }
+                }
+                AppBarRow {
+                    clickableItem(
+                        onClick = onPreviousHymnClick,
+                        icon = {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowLeft,
+                                contentDescription = stringResource(R.string.icon_left_arrow)
+                            )
+                        },
+                        label = strPrevHymn,
+                        enabled = hymnIndex.first > 1
+                    )
+                    clickableItem(
+                        onClick = onNextHymnClick,
+                        icon = {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowRight,
+                                contentDescription = stringResource(R.string.icon_right_arrow)
+                            )
+                        },
+                        label = strNextHymn,
+                        enabled = hymnIndex.first < hymnIndex.second
+                    )
+                    toggleableItem(
+                        checked = hymn.favorite,
+                        onCheckedChange = { onFavoriteClick() },
+                        icon = {
+                            AnimatedContent(hymn.favorite) { favorite ->
+                                if (favorite) {
+                                    Icon(
+                                        Icons.Filled.Favorite,
+                                        contentDescription = stringResource(R.string.icon_favorite)
+                                    )
+                                } else {
+                                    Icon(
+                                        Icons.Filled.FavoriteBorder,
+                                        contentDescription = stringResource(R.string.icon_favorite)
+                                    )
+                                }
                             }
+                        },
+                        label = strFavorite
+                    )
+                    clickableItem(
+                        onClick = onPlaylistAddClick,
+                        icon = {
+                            Icon(
+                                Icons.AutoMirrored.Filled.PlaylistAdd,
+                                contentDescription = stringResource(R.string.icon_add_to_playlist)
+                            )
+                        },
+                        label = strPlaylistAdd
+                    )
+                    clickableItem(
+                        onClick = if (isLyricsScreen) {
+                            onSheetMusicClick
+                        } else {
+                            onLyricsClick
+                        },
+                        icon = {
+                            AnimatedContent(isLyricsScreen) { isLyricsScreen ->
+                                if (isLyricsScreen) {
+                                    Icon(
+                                        Icons.Default.Piano,
+                                        contentDescription = stringResource(R.string.icon_music_note)
+                                    )
+                                } else {
+                                    Icon(
+                                        Icons.Default.Lyrics,
+                                        contentDescription = stringResource(R.string.lyrics)
+                                    )
+                                }
+                            }
+                        },
+                        label = if (isLyricsScreen) {
+                            strSheetMusic
+                        } else {
+                            strLyrics
+                        },
+                        enabled = if (isLyricsScreen) {
+                            hymn.sheetMusic.isNotEmpty()
+                        } else {
+                            true
                         }
-                    },
-                    label = if (isLyricsScreen) {strSheetMusic} else {strLyrics},
-                    enabled = if (isLyricsScreen) {hymn.sheetMusic.isNotEmpty()} else {true}
-                )
+                    )
+                }
             }
         },
         expanded = true,

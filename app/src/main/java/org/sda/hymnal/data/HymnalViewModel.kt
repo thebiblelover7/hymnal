@@ -505,7 +505,7 @@ class HymnalViewModel(
                     val query = event.query.replace(Regex("\""), "\"\"")
                         .replace(Regex("-"), "")
                     val searchQuery = "\"${query.trim()}\"*"
-                    if (searchQuery.length > 7) {
+                    if (searchQuery.length > 5) {
                         Log.d("search", "searchQuery $searchQuery")
                         CoroutineScope(Dispatchers.IO).launch {
                             Log.d("search", "Performing Search")
