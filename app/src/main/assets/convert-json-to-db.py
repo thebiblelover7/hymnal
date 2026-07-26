@@ -15,7 +15,7 @@ cursor.execute("""
         "favorite" INTEGER NOT NULL,
         "sheet_music"	TEXT NOT NULL,
         "text"	TEXT NOT NULL,
-        "first_line"    TEXT NOT NULL,
+        "first_line"    TEXT NOT NULL DEFAULT '',
         PRIMARY KEY("hymnal","number")
     )
 """)
