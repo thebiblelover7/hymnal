@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -32,11 +33,13 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.SearchBarValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberContainedSearchBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
@@ -52,12 +55,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import my.nanihadesuka.compose.LazyColumnScrollbar
 import my.nanihadesuka.compose.ScrollbarSettings
 import org.sda.hymnal.BottomHymnalBar
 import org.sda.hymnal.R
 import org.sda.hymnal.data.hymn.Hymn
-import org.sda.hymnal.data.hymn.hymnTags
 import org.sda.hymnal.data.playlist.PlaylistHymn
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -83,6 +86,7 @@ fun ListScreen(
         delay(300.milliseconds)
         onSearch(query.value)
     }
+    val scope = rememberCoroutineScope()
     val scrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
     val textFieldState = rememberTextFieldState()
     LaunchedEffect(textFieldState) {
@@ -113,10 +117,16 @@ fun ListScreen(
                     )
                 },
                 trailingIcon = {
-                    if (isSearchActive) {
+                    AnimatedVisibility(
+                        visible = searchState.currentValue == SearchBarValue.Expanded,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
                         IconButton(
                             onClick = {
-                                if (query.value.isNotEmpty()) onSearchChange("") else setSearchActive(false)
+                                scope.launch {
+                                    if (textFieldState.text.isNotEmpty()) textFieldState.clearText() else searchState.animateToCollapsed()
+                                }
                             }
                         ) {
                             Icon(
@@ -224,7 +234,6 @@ fun HymnListItem(
     modifier: Modifier,
     trailingContent: @Composable () -> Unit = { },
 ) {
-    val regex = Regex("(${hymnTags.joinToString(separator = "|")})\n")
     ListItem(
         modifier = modifier,
         leadingContent = {
@@ -246,8 +255,7 @@ fun HymnListItem(
             )
         },
         supportingContent = {
-            val shortTextLine = hymnPair.first.text.take(50)
-                .replace(regex = regex, replacement = "")
+            val shortTextLine = hymnPair.first.firstLine + TextOverflow.Ellipsis.toString()
             Text(
                 text = shortTextLine,
                 fontSize = 14.sp,

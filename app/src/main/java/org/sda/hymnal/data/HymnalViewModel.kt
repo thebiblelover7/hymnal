@@ -502,9 +502,10 @@ class HymnalViewModel(
                 }
 
                 is HymnalEvent.PerformSearch -> {
-                    val query = event.query
-                    val searchQuery = query.trim().replace(Regex("[^a-zA-Z0-9\\s]"), "")
-                    if (searchQuery.length > 3) {
+                    val query = event.query.replace(Regex("\""), "\"\"")
+                        .replace(Regex("-"), "")
+                    val searchQuery = "\"${query.trim()}\"*"
+                    if (searchQuery.length > 7) {
                         Log.d("search", "searchQuery $searchQuery")
                         CoroutineScope(Dispatchers.IO).launch {
                             Log.d("search", "Performing Search")
