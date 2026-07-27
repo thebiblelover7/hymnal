@@ -19,9 +19,28 @@ import org.sda.hymnal.data.setting.Settings
 
 @Database(
     entities = [DbHymn::class, DbHymnFTS::class, Settings::class, Playlist::class, PlaylistHymn::class],
-    version = 2,
+    version = 5,
     autoMigrations = [
-        AutoMigration(from = 1, to = 2)
+        AutoMigration(      // Add FTS5 table for search
+            from = 1,
+            to = 2,
+            spec = Migrations.AutoMigrationRebuildFts::class
+        ),
+        AutoMigration(      // Add first_line column to hymns
+            from = 2,
+            to = 3,
+            spec = Migrations.AutoMigration2To3::class
+        ),
+        AutoMigration(      // Add first_line to FTS5 for search priority
+            from = 3,
+            to = 4,
+            spec = Migrations.AutoMigrationRebuildFts::class
+        ),
+        AutoMigration(      // Switch to unicode61 tokenizer for FTS5
+            from = 4,
+            to = 5,
+            spec = Migrations.AutoMigrationRebuildFts::class
+        )
     ]
 )
 abstract class HymnDatabase : RoomDatabase() {

@@ -15,6 +15,7 @@ cursor.execute("""
         "favorite" INTEGER NOT NULL,
         "sheet_music"	TEXT NOT NULL,
         "text"	TEXT NOT NULL,
+        "first_line"    TEXT NOT NULL DEFAULT '',
         PRIMARY KEY("hymnal","number")
     )
 """)
@@ -90,15 +91,43 @@ for hymnal in hymnals:
         else:
             sheetmusic = "[]"
 
-        hymn = (hymnal[0], hymn_source["number"], hymn_source["title"], False, sheetmusic, hymn_source["content"])
+        hymn = (hymnal[0], hymn_source["number"], hymn_source["title"], False, sheetmusic, hymn_source["content"], "")
         data.append(hymn)
     
-cursor.executemany("INSERT INTO hymns VALUES(?, ?, ?, ?, ?, ?)", data)
+cursor.executemany("INSERT INTO hymns VALUES(?, ?, ?, ?, ?, ?, ?)", data)
 
 settings = [(0, "new-hymnal-en", 1)]
 playlists = [("favorites", "Favorites", 0)]
 cursor.executemany("INSERT INTO settings VALUES(?, ?, ?)", settings)
 cursor.executemany("INSERT INTO playlists VALUES(?, ?, ?)",playlists)
+
+hymnTagsExpression = "WHEN line1 LIKE '1.' OR line1 LIKE '2.' OR line1 LIKE '3.' OR line1 LIKE '4.' OR line1 LIKE '5.' OR line1 LIKE '6.' OR line1 LIKE '7.' OR line1 LIKE '8.' OR line1 LIKE '9.' OR line1 LIKE '10.' OR line1 LIKE 'CHORUS:' OR line1 LIKE 'Refrain' OR line1 LIKE 'Coro' OR line1 LIKE 'Côro:' OR line1 LIKE 'Припев:'"
+
+cursor.execute("""
+                UPDATE hymns
+                SET first_line = (
+                	SELECT
+                		REPLACE(
+                			CASE """
+                    + hymnTagsExpression
+                    + """
+                        THEN
+                					TRIM(SUBSTR(
+                						SUBSTR(text, INSTR(text || CHAR(10), CHAR(10)) + 1), 1, 50)
+                						)
+                				ELSE
+                					TRIM(SUBSTR(text, 1, 50))
+                			END,
+                			CHAR(10),
+                			' '
+                		)
+                	FROM (
+                		SELECT
+                			TRIM(SUBSTR(text, 1, INSTR(text || CHAR(10), CHAR(10)) - 1)) AS line1
+                	)
+                )
+""")
+
 connection.commit()
 connection.close()
 

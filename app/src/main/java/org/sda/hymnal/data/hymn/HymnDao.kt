@@ -24,18 +24,17 @@ interface HymnDao {
     suspend fun searchHymns(searchQuery: String): MutableList<DbHymn>
 
     @Query("""
-        SELECT *, bm25(hymns_fts, 5.0, 1.0) AS score
+        SELECT *, bm25(hymns_fts, 10.0, 5.0, 1.0) AS score
         FROM hymns
         JOIN hymns_fts ON hymns.rowid = hymns_fts.rowid
         WHERE hymnal = :hymnal
             AND hymns_fts MATCH :query
-            AND score <= :scoreThreshold
-        ORDER BY score
+        ORDER BY 
+            score
     """)
     suspend fun searchBMHymns(
         query: String,
-        hymnal: String,
-        scoreThreshold: Double = -5.0
+        hymnal: String
     ): MutableList<DbHymn>
     @Update
     suspend fun setHymn(dbHymn: DbHymn)

@@ -7,5 +7,5 @@ object Hymnals {
     object NewSpanish: Hymnal("Español - Nuevo Himnario (2010)", "new-hymnal-es", "sheets_new_es_")
     object OldSpanish: Hymnal("Español - Viejo Himnario (1962)", "old-hymnal-es", "")
     object Portuguese: Hymnal("Português - Novo Hinario (1996)", "new-hymnal-pt", "")
-    object Russian: Hymnal("Русский - Гимны Надежды", "new-hymnal-ru", "sheets_ru_")
+    object Russian: Hymnal("Русский - Гимны Надежды (1997)", "new-hymnal-ru", "sheets_ru_")
 }

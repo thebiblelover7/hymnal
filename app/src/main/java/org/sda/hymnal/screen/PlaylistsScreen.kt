@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,6 +15,10 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -48,7 +51,6 @@ import org.sda.hymnal.BottomHymnalBar
 import org.sda.hymnal.HymnalTopBar
 import org.sda.hymnal.R
 import org.sda.hymnal.data.hymn.Hymn
-import org.sda.hymnal.data.hymn.hymnTags
 import org.sda.hymnal.data.playlist.Playlist
 import org.sda.hymnal.data.playlist.PlaylistHymn
 
@@ -178,6 +180,12 @@ fun PlaylistDropdownMenu(
             onDismissRequest = { expanded = false }
         ) {
             DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = stringResource(R.string.rename_playlist)
+                    )
+                },
                 text = {Text(stringResource(R.string.rename_playlist))},
                 onClick = {
                     onPlaylistRenameClick()
@@ -185,6 +193,12 @@ fun PlaylistDropdownMenu(
                 }
             )
             DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.delete_playlist)
+                    )
+                },
                 text = {Text(stringResource(R.string.delete_playlist))},
                 onClick = {
                     onDeleteClick()
@@ -247,15 +261,27 @@ fun PlaylistHymnsScreen(
 //                contentPadding = padding,
                 state = listState
             ) {
-                items(hymns) { hymn ->
-                    PlaylistHymnListItem(
+                items(hymns, key = { it.second?.id ?: "${it.first.number} ${it.first.hymnal.fileName}"}) { hymn ->
+                    val index = Pair(hymn.second?.position ?: 0, playlist.count)
+                    HymnListItem(
                         hymnPair = hymn,
-                        onHymnClick = onHymnClick,
-                        onRemoveClick = { onRemoveClick(hymn, playlist) },
-                        onMoveClick = { moveBy ->
-                            onMoveClick(hymn, playlist, moveBy)
-                        },
-                        index = Pair(hymn.second?.position ?: 0, playlist.count)
+                        modifier = Modifier
+                            .animateItem()
+                            .clickable(
+                                onClick = { onHymnClick(hymn) }
+                            ),
+                        trailingContent = {
+                            val showMoveUp = if (hymn.second?.playlist != "favorites") {index.first > 1} else {false}
+                            val showMoveDown = if (hymn.second?.playlist != "favorites") {index.first < index.second} else {false}
+                            PlaylistHymnDropdownMenu (
+                                onRemoveClick = { onRemoveClick(hymn, playlist) },
+                                onMoveClick = { moveBy ->
+                                    onMoveClick(hymn, playlist, moveBy)
+                                },
+                                showMoveUp = showMoveUp,
+                                showMoveDown = showMoveDown
+                            )
+                        }
                     )
                 }
             }
@@ -275,6 +301,11 @@ fun PlaylistDialog(
         onDismissRequest = {
             onPlaylistDialogVisible(false)
             playlistNameString = ""
+        },
+        title = {
+            Text(
+                text = stringResource(R.string.playlist_create)
+            )
         },
         text = {
             TextField(
@@ -376,89 +407,6 @@ fun PlaylistItem(
     }
 }
 
-
-@Composable
-fun PlaylistHymnListItem(
-//    hymn: Hymn,
-    hymnPair: Pair<Hymn, PlaylistHymn?>,
-    onHymnClick: (hymnPair: Pair<Hymn, PlaylistHymn?>) -> Unit,
-    onRemoveClick: () -> Unit,
-    onMoveClick: (moveBy: Int) -> Unit,
-    index: Pair<Int, Int>
-) {
-    val regex = Regex("(${hymnTags.joinToString(separator = "|")})\n")
-    Row(
-        modifier = Modifier
-            .clickable(
-                enabled = true,
-                onClick = { onHymnClick(hymnPair) }
-            )
-            .padding(vertical = 0.dp, horizontal = 5.dp),
-//            .height(64.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(
-            modifier = Modifier
-                .defaultMinSize(minWidth = 80.dp)
-                .weight(2f)
-                .padding(horizontal = 20.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = hymnPair.first.number.toString(),
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 24.sp
-            )
-        }
-        Column(
-            modifier = Modifier
-                .weight(6f)
-                .padding(vertical = 10.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                text = hymnPair.first.title,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
-            )
-            val shortTextLine = hymnPair.first.text.take(50)
-                .replace(regex = regex, replacement = "")
-            Text(
-                text = shortTextLine,
-                fontSize = 14.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onBackground.copy(
-                    alpha = 0.8f
-                )
-            )
-        }
-        Column(
-            modifier = Modifier
-//                .defaultMinSize(minWidth = 80.dp)
-                .weight(1f)
-                .padding(horizontal = 10.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val showMoveUp = if (hymnPair.second?.playlist != "favorites") {index.first > 1} else {false}
-            val showMoveDown = if (hymnPair.second?.playlist != "favorites") {index.first < index.second} else {false}
-            PlaylistHymnDropdownMenu (
-                onRemoveClick = onRemoveClick,
-                onMoveClick = { moveBy ->
-                    onMoveClick(moveBy)
-                },
-                showMoveUp = showMoveUp,
-                showMoveDown = showMoveDown
-            )
-        }
-    }
-}
-
 @Composable
 fun PlaylistHymnDropdownMenu(
     onRemoveClick: () -> Unit,
@@ -478,6 +426,12 @@ fun PlaylistHymnDropdownMenu(
             onDismissRequest = { expanded = false }
         ) {
             DropdownMenuItem(
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.remove_from_playlist)
+                    )
+                },
                 text = {Text(stringResource(R.string.remove_from_playlist))},
                 onClick = {
                     onRemoveClick()
@@ -486,6 +440,12 @@ fun PlaylistHymnDropdownMenu(
             )
             if (showMoveUp) {
                 DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.ArrowUpward,
+                            contentDescription = stringResource(R.string.playlist_move_up)
+                        )
+                    },
                     text = { Text(stringResource(R.string.playlist_move_up)) },
                     onClick = {
                         onMoveClick(-1)
@@ -495,6 +455,12 @@ fun PlaylistHymnDropdownMenu(
             }
             if (showMoveDown) {
                 DropdownMenuItem(
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.ArrowDownward,
+                            contentDescription = stringResource(R.string.playlist_move_down)
+                        )
+                    },
                     text = { Text(stringResource(R.string.playlist_move_down)) },
                     onClick = {
                         onMoveClick(1)

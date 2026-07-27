@@ -1,7 +1,6 @@
 package org.sda.hymnal.data
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -26,7 +25,7 @@ class HymnalViewModel(
     private val applicationContext: Context
 ) : ViewModel() {
     private val _hymnalState = MutableStateFlow(HymnalState())
-    private val hymnMapper by lazy { HymnConverter(applicationContext) }
+    private val hymnMapper by lazy { HymnConverter() }
 
     val hymnDb by lazy {
         HymnDatabase.getDatabase(applicationContext)
@@ -86,18 +85,18 @@ class HymnalViewModel(
                         val playlists = _hymnalState.value.playlists
                         val playlist = event.playlist
                         val currentHymn = event.hymnPair.first
-                        val currentPlaylistPlaylistHymns = playlistHymnDao.getPlaylist(playlist.id)
-                        currentPlaylistPlaylistHymns.sortBy { it.position }
-
                         if (playlist.id == "favorites") {
+                            onEvent(HymnalEvent.SetCurrentHymn(event.hymnPair))
                             onEvent(HymnalEvent.SetFavorite)
-
                             onEvent(HymnalEvent.ShowSnackbar(
                                 applicationContext.getString(
                                     R.string.hymn_added_to_favorites
                                 )))
                             return@launch
                         }
+
+                        val currentPlaylistPlaylistHymns = playlistHymnDao.getPlaylist(playlist.id)
+                        currentPlaylistPlaylistHymns.sortBy { it.position }
                         // Update playlistHymns list
                         val position = if (currentPlaylistPlaylistHymns.isNotEmpty()) {currentPlaylistPlaylistHymns.last().position + 1} else { 1 }
                         val playlistHymnToAdd = PlaylistHymn(
@@ -133,13 +132,14 @@ class HymnalViewModel(
                     val hymnPairPlaylistHymn = event.hymnPair.second
                     val playlist = event.playlist
                     if (hymnPairPlaylistHymn != null) {
-                        if (playlist.id == "favorites") {
-                            onEvent(HymnalEvent.SetFavorite)
-                            onEvent(HymnalEvent.ShowSnackbar(
-                                applicationContext.getString(R.string.hymn_removed_from_favorites)))
-                            return@launch
-                        }
                         CoroutineScope(Dispatchers.IO).launch {
+                            if (playlist.id == "favorites") {
+                                onEvent(HymnalEvent.SetCurrentHymn(event.hymnPair))
+                                onEvent(HymnalEvent.SetFavorite)
+                                onEvent(HymnalEvent.ShowSnackbar(
+                                    applicationContext.getString(R.string.hymn_removed_from_favorites)))
+                                return@launch
+                            }
                             val playlistHymns = playlistHymnDao.getPlaylist(playlist.id)
                             playlistHymns.sortBy { it.position }
                             val playlistHymnIndex = playlistHymns.indexOf(hymnPairPlaylistHymn)
@@ -332,13 +332,13 @@ class HymnalViewModel(
                             _hymnalState.value.playlists.find { it.id == "favorites" }
                         val currentHymn = _hymnalState.value.currentHymnPair ?: return@launch
                         val modifiedHymn = currentHymn.copy(
-                            first = currentHymn.first.copy(favorite = !currentHymn.first.favorite)
+                            first = currentHymn.first.copy(favorite = !currentHymn.first.favorite),
                         )
-                        hymnDao.setHymn(modifiedHymn.first.let(hymnMapper::convertToDbHymn))
                         val modHymnIndex = _hymnalState.value.currentHymns.indexOf(currentHymn.first)
                         if (modHymnIndex != -1) {
                             _hymnalState.value.currentHymns[modHymnIndex] = modifiedHymn.first
                         }
+                        hymnDao.setHymn(modifiedHymn.first.let(hymnMapper::convertToDbHymn))
                         _hymnalState.update {
                             it.copy(
                                 currentHymnPair = modifiedHymn
@@ -357,7 +357,15 @@ class HymnalViewModel(
                                     playlist = "favorites",
                                     position = position
                                 )
-//                                playlistHymns.add(playlistHymnToAdd)
+                                if ((_hymnalState.value.currentPlaylist?.id
+                                        ?: false) == "favorites"
+                                ) {
+                                    _hymnalState.value.currentPlaylistPair.add(
+                                        modifiedHymn.copy(
+                                            second = playlistHymnToAdd
+                                        )
+                                    )
+                                }
                                 playlistHymnDao.upsertPlaylistHymn(playlistHymnToAdd)
 
                                 // Update playlist hymn count
@@ -367,7 +375,6 @@ class HymnalViewModel(
                                 _hymnalState.update {
                                     it.copy(
                                         playlists = playlists,
-//                                        currentPlaylistPlaylistHymns = playlistHymns
                                     )
                                 }
                             } else {                        // to be unfavorited
@@ -378,7 +385,15 @@ class HymnalViewModel(
                                 if (playlistHymns.remove(playlistHymn)) {
                                     playlistHymnDao.deletePlaylistHymn(playlistHymn)
                                 }
-
+                                if ((_hymnalState.value.currentPlaylist?.id
+                                        ?: false) == "favorites"
+                                ) {
+                                    _hymnalState.value.currentPlaylistPair.remove(
+                                        currentHymn.copy(
+                                            second = playlistHymn
+                                        )
+                                    )
+                                }
                                 // Update playlist hymn count
                                 val updatedPlaylist = favoritesPlaylist.copy(count = favoritesPlaylist.count - 1)
                                 playlists[playlists.indexOf(favoritesPlaylist)] = updatedPlaylist
@@ -502,12 +517,11 @@ class HymnalViewModel(
                 }
 
                 is HymnalEvent.PerformSearch -> {
-                    val query = _hymnalState.value.currentSearchString.value
-                    val searchQuery = query.trim().replace(Regex.fromLiteral("\""), "\"\"")
-                    if (searchQuery.length > 3) {
-                        Log.d("search", "searchQuery $searchQuery")
+                    val query = event.query.replace(Regex("\""), "\"\"")
+                        .replace(Regex("-"), "")
+                    val searchQuery = "\"${query.trim()}\"*"
+                    if (searchQuery.length > 5) {
                         CoroutineScope(Dispatchers.IO).launch {
-                            Log.d("search", "Performing Search")
                             val searchedDbHymns = hymnDao.searchBMHymns(
                                 searchQuery,
                                 _hymnalState.value.currentHymnal.fileName
