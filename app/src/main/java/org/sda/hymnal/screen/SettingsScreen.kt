@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +42,7 @@ fun SettingsScreen(
     fontSize: Float,
     onNavClick: (screen: Screen) -> Unit,
     onFontSizeSet: (fontSize: Float) -> Unit,
+    onManageHymnalClick: () -> Unit,
 ) {
     Scaffold(
         snackbarHost = snackbarHost,
@@ -146,6 +148,18 @@ fun SettingsScreen(
                     lineHeight = (27 * fontSize).sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(0.8f)
                 )
+            }
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Button(
+                    onClick = onManageHymnalClick
+                ) {
+                    Text("Manage Hymnals")
+                }
             }
         }
     }

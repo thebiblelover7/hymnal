@@ -42,7 +42,6 @@ import org.sda.hymnal.BottomHymnalBar
 import org.sda.hymnal.R
 import org.sda.hymnal.data.hymn.Hymn
 import org.sda.hymnal.data.hymnal.Hymnal
-import org.sda.hymnal.data.hymnal.hymnalList
 
 @Composable
 fun HomeScreen(
@@ -55,6 +54,7 @@ fun HomeScreen(
     currentHymnal: Hymnal,
     onHymnalClick: (hymnal: Hymnal) -> Unit,
     snackbarHost: @Composable () -> Unit,
+    hymnals: List<Hymnal>
 ) {
     Scaffold(
         snackbarHost = snackbarHost,
@@ -150,7 +150,8 @@ fun HomeScreen(
             ) {
                 HymnalDropdown(
                     currentHymnal = currentHymnal,
-                    onHymnalClick = onHymnalClick
+                    onHymnalClick = onHymnalClick,
+                    hymnals = hymnals
                 )
             }
         }
@@ -158,7 +159,11 @@ fun HomeScreen(
 }
 
 @Composable
-fun HymnalDropdown(currentHymnal: Hymnal, onHymnalClick: (hymnal: Hymnal) -> Unit) {
+fun HymnalDropdown(
+    currentHymnal: Hymnal,
+    onHymnalClick: (hymnal: Hymnal) -> Unit,
+    hymnals: List<Hymnal>
+) {
     val isDropdownOpen = remember{ mutableStateOf(false)}
     Box {
         Row(
@@ -180,7 +185,7 @@ fun HymnalDropdown(currentHymnal: Hymnal, onHymnalClick: (hymnal: Hymnal) -> Uni
             expanded = isDropdownOpen.value,
             onDismissRequest = { isDropdownOpen.value = false }
         ) {
-            for (hymnal in hymnalList) {
+            for (hymnal in hymnals) {
                 DropdownMenuItem(
                     text = { Text(hymnal.title) },
                     onClick = {

@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.sda.hymnal.data.hymn.Hymn
+import org.sda.hymnal.data.hymnal.DefaultHymnals
 import org.sda.hymnal.data.hymnal.Hymnal
-import org.sda.hymnal.data.hymnal.Hymnals
 import org.sda.hymnal.data.playlist.Playlist
 import org.sda.hymnal.data.playlist.PlaylistHymn
 import org.sda.hymnal.data.setting.Settings
@@ -14,11 +14,12 @@ import org.sda.hymnal.screen.NavigationScreens
 import org.sda.hymnal.screen.Screen
 
 data class HymnalState(
+    val hymnals: MutableList<Hymnal> = mutableListOf(),
     val currentScreen: Screen = NavigationScreens.Home,
     val currentHymn: Hymn? = null,
     val currentHymnPair: Pair<Hymn, PlaylistHymn?>? = null,
-    val currentHymnal: Hymnal = Hymnals.NewEnglish,
-    val settings: Settings = Settings(hymnal = Hymnals.NewEnglish.fileName, fontSize = 1f),
+    val currentHymnal: Hymnal = DefaultHymnals.NewEnglish,
+    val settings: Settings = Settings(hymnal = DefaultHymnals.NewEnglish.fileName, fontSize = 1f),
     val currentHymns: MutableList<Hymn> = mutableListOf(),
     val searchedHymns: SnapshotStateList<Hymn> = mutableStateListOf(),
     val allHymns: List<Hymn> = emptyList(),

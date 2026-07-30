@@ -8,6 +8,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
@@ -33,8 +35,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
@@ -46,6 +50,7 @@ import org.sda.hymnal.data.HymnalViewModel
 import org.sda.hymnal.screen.HomeScreen
 import org.sda.hymnal.screen.HymnScreen
 import org.sda.hymnal.screen.HymnalEvent
+import org.sda.hymnal.screen.HymnalsScreen
 import org.sda.hymnal.screen.ListScreen
 import org.sda.hymnal.screen.NavigationScreens
 import org.sda.hymnal.screen.PlaylistHymnsScreen
@@ -63,13 +68,7 @@ fun MainApplication(hymnalViewModel: HymnalViewModel) {
 
     LaunchedEffect(Unit) {
         hymnalViewModel.viewModelScope.launch {
-//            for (hymnal in hymnalList) {
-//                hymnalViewModel.onEvent(HymnalEvent.LoadHymns(loadHymns(context, hymnal)))
-//            }
             hymnalViewModel.onEvent(HymnalEvent.LoadSettings)
-//            hymnalViewModel.onEvent(HymnalEvent.LoadHymns(emptyList()))
-//            hymnalViewModel.onEvent(HymnalEvent.SetLoadingHymns(false))
-//            hymnalViewModel.onEvent(HymnalEvent.SetCurrentHymnal(Hymnals.NewEnglish))
         }
 
     }
@@ -81,9 +80,20 @@ fun MainApplication(hymnalViewModel: HymnalViewModel) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .padding(20.dp)
+                    .size(48.dp)
+            )
+            Text(
+                text = stringResource(R.string.app_loading),
+                color = Color.Unspecified.copy(alpha = 0.7f)
+            )
         }
     } else {
+        val snackbarHost = @Composable {
+            SnackbarHost(hostState = hymnalState.value.snackbarHostState)
+        }
         NavHost(
             navController = navController,
             modifier = Modifier
@@ -126,7 +136,8 @@ fun MainApplication(hymnalViewModel: HymnalViewModel) {
                     currentHymnal = hymnalState.value.currentHymnal,
                     onHymnalClick = { hymnal ->
                         hymnalViewModel.onEvent(HymnalEvent.SetCurrentHymnal(hymnal))
-                    }
+                    },
+                    hymnals = hymnalState.value.hymnals
                 )
             }
             homeScreen(
@@ -135,9 +146,7 @@ fun MainApplication(hymnalViewModel: HymnalViewModel) {
             ) {
                 ListScreen(
                     currentScreen = hymnalState.value.currentScreen,
-                    snackbarHost = {
-                        SnackbarHost(hostState = hymnalState.value.snackbarHostState)
-                    },
+                    snackbarHost = snackbarHost,
                     onNavClick = { screen ->
                         navController.popBackStack()
                         navController.navigate(screen)
@@ -169,9 +178,7 @@ fun MainApplication(hymnalViewModel: HymnalViewModel) {
                 hymnalViewModel = hymnalViewModel
             ) {
                 PlaylistsScreen(
-                    snackbarHost = {
-                        SnackbarHost(hostState = hymnalState.value.snackbarHostState)
-                    },
+                    snackbarHost = snackbarHost,
                     currentScreen = hymnalState.value.currentScreen,
                     onNavClick = { screen ->
                         navController.popBackStack()
@@ -202,9 +209,7 @@ fun MainApplication(hymnalViewModel: HymnalViewModel) {
             ) {
                 PlaylistHymnsScreen(
                     currentScreen = hymnalState.value.currentScreen,
-                    snackbarHost = {
-                        SnackbarHost(hostState = hymnalState.value.snackbarHostState)
-                    },
+                    snackbarHost = snackbarHost,
                     onNavClick = { screen ->
                         navController.popBackStack()
                         navController.navigate(screen)
@@ -232,17 +237,33 @@ fun MainApplication(hymnalViewModel: HymnalViewModel) {
                 hymnalViewModel = hymnalViewModel
             ) {
                 SettingsScreen(
+                    snackbarHost = snackbarHost,
                     currentScreen = hymnalState.value.currentScreen,
-                    snackbarHost = {
-                        SnackbarHost(hostState = hymnalState.value.snackbarHostState)
-                    },
                     fontSize = hymnalState.value.settings.fontSize,
                     onNavClick = { screen ->
                         navController.popBackStack()
                         navController.navigate(screen)
                     },
+                    onManageHymnalClick = {
+                        navController.navigate(NavigationScreens.Hymnals)
+                    },
                     onFontSizeSet = { fontSize ->
-                        hymnalViewModel.onEvent(HymnalEvent.SetFontSize(fontSize))
+                    hymnalViewModel.onEvent(HymnalEvent.SetFontSize(fontSize))
+                    }
+                )
+            }
+            screen(
+                screenObject = NavigationScreens.Hymnals,
+                hymnalViewModel = hymnalViewModel
+            ) {
+                HymnalsScreen(
+                    snackbarHost = snackbarHost,
+                    onClickBack = {
+                        navController.navigateUp()
+                    },
+                    hymnals = hymnalState.value.hymnals,
+                    setHymnalUri = { hymnalUri ->
+                        hymnalViewModel.onEvent(HymnalEvent.AddHymnal(hymnalUri))
                     }
                 )
             }
@@ -251,9 +272,7 @@ fun MainApplication(hymnalViewModel: HymnalViewModel) {
                 hymnalViewModel = hymnalViewModel
             ) {
                 HymnScreen(
-                    snackbarHost = {
-                        SnackbarHost(hostState = hymnalState.value.snackbarHostState)
-                    },
+                    snackbarHost = snackbarHost,
                     onClickBack = {
                         navController.navigateUp()
                     },
@@ -312,9 +331,7 @@ fun MainApplication(hymnalViewModel: HymnalViewModel) {
                 hymnalViewModel = hymnalViewModel
             ) {
                 PlaylistsScreen(
-                    snackbarHost = {
-                        SnackbarHost(hostState = hymnalState.value.snackbarHostState)
-                    },
+                    snackbarHost = snackbarHost,
                     currentScreen = hymnalState.value.currentScreen,
                     onNavClick = {},
                     playlists = hymnalState.value.playlists,

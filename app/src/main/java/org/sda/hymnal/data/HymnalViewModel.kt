@@ -1,6 +1,7 @@
 package org.sda.hymnal.data
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,13 +12,20 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 import org.sda.hymnal.R
+import org.sda.hymnal.data.hymn.DbHymn
 import org.sda.hymnal.data.hymn.Hymn
-import org.sda.hymnal.data.hymn.HymnConverter
-import org.sda.hymnal.data.hymnal.hymnalList
+import org.sda.hymnal.data.hymn.getSheetMusicResource
+import org.sda.hymnal.data.hymnal.Hymnal
+import org.sda.hymnal.data.hymnal.JsonHymnal
+import org.sda.hymnal.data.hymnal.defaultHymnals
 import org.sda.hymnal.data.playlist.Playlist
 import org.sda.hymnal.data.playlist.PlaylistHymn
 import org.sda.hymnal.screen.HymnalEvent
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -25,13 +33,43 @@ class HymnalViewModel(
     private val applicationContext: Context
 ) : ViewModel() {
     private val _hymnalState = MutableStateFlow(HymnalState())
-    private val hymnMapper by lazy { HymnConverter() }
+
+    fun convertToHymn(dbHymn: DbHymn): Hymn {
+        val sheetsStr: List<String> = if (dbHymn.sheetMusic.isNotBlank()) {Json.decodeFromString(dbHymn.sheetMusic)} else emptyList()
+        val sheetsInt = sheetsStr.map { sheetPath ->
+            getSheetMusicResource(sheetPath)
+        }
+        val hymnal = _hymnalState.value.hymnals.find { it.fileName == dbHymn.hymnal }
+        return Hymn(
+            title = dbHymn.title,
+            hymnal = hymnal!!,
+            number = dbHymn.number,
+            text = dbHymn.text,
+            sheetMusic = sheetsInt,
+            sheetMusicStr = dbHymn.sheetMusic,
+            favorite = dbHymn.favorite,
+            firstLine = dbHymn.firstLine
+        )
+    }
+
+    fun convertToDbHymn(hymn: Hymn): DbHymn {
+        return DbHymn(
+            hymnal = hymn.hymnal.fileName,
+            number = hymn.number,
+            title = hymn.title,
+            favorite = hymn.favorite,
+            sheetMusic = hymn.sheetMusicStr,
+            text = hymn.text,
+            firstLine = hymn.firstLine
+        )
+    }
 
     val hymnDb by lazy {
         HymnDatabase.getDatabase(applicationContext)
     }
 
     private val hymnDao = hymnDb.hymnDao
+    private val hymnalDao = hymnDb.hymnalDao
     private val settingDao = hymnDb.settingDao
     private val playlistDao = hymnDb.playlistDao
     private val playlistHymnDao = hymnDb.playlistHymnDao
@@ -45,6 +83,94 @@ class HymnalViewModel(
     fun onEvent(event: HymnalEvent) {
         viewModelScope.launch {
             when (event) {
+                is HymnalEvent.AddHymnal -> {
+                    val uri = event.fileUri ?: return@launch
+                    val jsonString: String = applicationContext.contentResolver.openInputStream(uri).use { stream ->
+                        BufferedReader(InputStreamReader(stream)).use { reader ->
+                            reader.readText()
+                        }
+                    }
+
+                    val jsonHymnal = try {
+                        Json.decodeFromString<JsonHymnal>(jsonString)
+                    } catch (e: IllegalArgumentException) {
+                        null
+                    } catch (e: SerializationException) {
+                        null
+                    }
+
+                    CoroutineScope(Dispatchers.IO).launch {
+                        if (jsonHymnal != null) {
+                            if (defaultHymnals.none { it.id == jsonHymnal.id }) {
+                                val previousHymnal = _hymnalState.value.hymnals.find { it.id == jsonHymnal.id }
+                                if (previousHymnal != null) {
+                                    if (jsonHymnal.version > previousHymnal.version) {
+                                        onEvent(HymnalEvent.RemoveHymnal(previousHymnal))
+                                    } else {
+                                        onEvent(
+                                            HymnalEvent.ShowSnackbar(
+                                                applicationContext.getString(
+                                                    R.string.hymnals_already_exists,
+                                                    jsonHymnal.id
+                                                )
+                                            )
+                                        )
+                                    }
+                                }
+                                val newHymnal = Hymnal(
+                                    id = jsonHymnal.id,
+                                    fileName = jsonHymnal.id,
+                                    version = jsonHymnal.version,
+                                    title = "${jsonHymnal.metadata.language} - ${jsonHymnal.metadata.title}",
+                                    userAdded = true
+                                )
+                                _hymnalState.value.hymnals.add(newHymnal)
+                                hymnalDao.addHymnal(newHymnal)
+                            } else {
+                                onEvent(
+                                    HymnalEvent.ShowSnackbar(
+                                        applicationContext.getString(
+                                            R.string.hymnals_already_exists,
+                                            jsonHymnal.id
+                                        )
+                                    )
+                                )
+                                return@launch
+                            }
+
+                            for (hymn in jsonHymnal.hymns) {
+                                val newHymn = DbHymn(
+                                    hymnal = jsonHymnal.id,
+                                    number = hymn.number,
+                                    title = hymn.title,
+                                    favorite = false,
+                                    sheetMusic = "",
+                                    text = hymn.content,
+                                    firstLine = hymn.content
+                                )
+                                hymnDao.setHymn(newHymn)
+                            }
+                            onEvent(HymnalEvent.LoadSettings)
+                        }
+                        Log.d("hymnal", "jsonHymnal: ${jsonHymnal?.id}")
+                    }
+                }
+
+                is HymnalEvent.RemoveHymnal -> {
+                    val hymnal = event.hymnal
+
+                    _hymnalState.value.hymnals.remove(hymnal)
+                    if (_hymnalState.value.currentHymnal == hymnal) {
+                        onEvent(HymnalEvent.SetCurrentHymnal(_hymnalState.value.hymnals.firstOrNull() ?: return@launch))
+                    }
+                    CoroutineScope(Dispatchers.IO).launch {
+                        if (defaultHymnals.none { it.id == hymnal.id }) {
+                            hymnDao.deleteHymnal(hymnal.id)
+                            hymnalDao.deleteHymnal(hymnal)
+                        }
+                    }
+                }
+
                 is HymnalEvent.AddPlaylist -> {
                     val newPlaylist = Playlist(
                         id = Uuid.generateV7().toString(),
@@ -287,9 +413,16 @@ class HymnalViewModel(
                         val playlists = playlistDao.getAll()
                         _hymnalState.value.playlists.clear()
                         _hymnalState.value.playlists.addAll(playlists)
+                        val hymnals = hymnalDao.getAll().ifEmpty { return@launch }
+                        _hymnalState.update {
+                            it.copy(
+                                hymnals = hymnals
+                            )
+                        }
+                        val currentHymnal = _hymnalState.value.hymnals.find { it.fileName == dbSettings.hymnal} ?: return@launch
                         _hymnalState.update { it ->
                             it.copy(
-                                currentHymnal = hymnalList.find { it.fileName == dbSettings.hymnal} ?: return@launch,
+                                currentHymnal = currentHymnal,
                                 isLoadingHymns = false,
                                 settings = _hymnalState.value.settings.copy(fontSize = dbSettings.fontSize),
                             )
@@ -315,7 +448,7 @@ class HymnalViewModel(
 //                                hymnMapper.convertToHymn(hymnDao.getHymn(hymn.hymnal, hymn.number))
 //                            )
                             _hymnalState.value.currentPlaylistPair.add(
-                                Pair(hymnMapper.convertToHymn(hymnDao.getHymn(playlistHymn.hymnal, playlistHymn.number)), playlistHymn)
+                                Pair(convertToHymn(hymnDao.getHymn(playlistHymn.hymnal, playlistHymn.number)), playlistHymn)
                             )
                         }
                     }
@@ -338,7 +471,7 @@ class HymnalViewModel(
                         if (modHymnIndex != -1) {
                             _hymnalState.value.currentHymns[modHymnIndex] = modifiedHymn.first
                         }
-                        hymnDao.setHymn(modifiedHymn.first.let(hymnMapper::convertToDbHymn))
+                        hymnDao.setHymn(modifiedHymn.first.let(::convertToDbHymn))
                         _hymnalState.update {
                             it.copy(
                                 currentHymnPair = modifiedHymn
@@ -419,7 +552,7 @@ class HymnalViewModel(
 
                 is HymnalEvent.LoadHymns -> {
                     CoroutineScope(Dispatchers.IO).launch {
-                        val hymns = hymnDao.getHymnal(_hymnalState.value.currentHymnal.fileName).map(hymnMapper::convertToHymn).toMutableList()
+                        val hymns = hymnDao.getHymnal(_hymnalState.value.currentHymnal.fileName).map(::convertToHymn).toMutableList()
                         _hymnalState.update {
                             it.copy(
                                 currentHymns = hymns
@@ -439,7 +572,7 @@ class HymnalViewModel(
                 is HymnalEvent.SetCurrentHymnal -> {
                     CoroutineScope(Dispatchers.IO).launch {
                         val hymns = hymnDao.getHymnal(event.hymnal.fileName)
-                            .map(hymnMapper::convertToHymn).toMutableList()
+                            .map(::convertToHymn).toMutableList()
                         _hymnalState.update {
                             it.copy(
                                 currentHymnal = event.hymnal,
@@ -527,7 +660,7 @@ class HymnalViewModel(
                                 _hymnalState.value.currentHymnal.fileName
                             )
                             val searchedHymns =
-                                searchedDbHymns.map(hymnMapper::convertToHymn).toMutableStateList()
+                                searchedDbHymns.map(::convertToHymn).toMutableStateList()
                             _hymnalState.update {
                                 it.copy(
                                     searchedHymns = searchedHymns

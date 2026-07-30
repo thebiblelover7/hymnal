@@ -3,6 +3,7 @@ package org.sda.hymnal.data
 import androidx.room3.migration.AutoMigrationSpec
 import androidx.sqlite.SQLiteConnection
 import org.sda.hymnal.data.hymn.hymnTagsExpression
+import org.sda.hymnal.data.hymnal.defaultHymnals
 
 abstract class Migrations {
 
@@ -42,6 +43,23 @@ abstract class Migrations {
                 	)
                 )
             """.trimIndent()).use { statement ->
+                statement.step()
+            }
+        }
+    }
+
+    class AutoMigration5To6 : AutoMigrationSpec {
+        override suspend fun onPostMigrate(connection: SQLiteConnection) {
+            super.onPostMigrate(connection)
+            val sqlValues = defaultHymnals.joinToString(
+                prefix = "(",
+                separator = "), (",
+                postfix = ")"
+            ) { "\'${it.id}\', \'${it.fileName}\', ${it.version}, \'${it.title}\', ${it.userAdded}"  }
+            val sqlStatement = """
+                INSERT INTO hymnals
+                VALUES """ + sqlValues.trimIndent()
+            connection.prepare(sqlStatement).use { statement ->
                 statement.step()
             }
         }

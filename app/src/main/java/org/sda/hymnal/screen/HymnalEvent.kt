@@ -1,5 +1,6 @@
 package org.sda.hymnal.screen
 
+import android.net.Uri
 import org.sda.hymnal.data.hymn.Hymn
 import org.sda.hymnal.data.hymnal.Hymnal
 import org.sda.hymnal.data.playlist.Playlist
@@ -7,6 +8,8 @@ import org.sda.hymnal.data.playlist.PlaylistHymn
 import org.sda.hymnal.data.setting.Settings
 
 sealed interface HymnalEvent {
+    data class AddHymnal(val fileUri: Uri?): HymnalEvent
+    data class RemoveHymnal(val hymnal: Hymnal): HymnalEvent
     data class AddPlaylist(val playlistName: String): HymnalEvent
     data class RenamePlaylist(val playlist: Playlist, val name: String): HymnalEvent
     data class DeletePlaylist(val playlist: Playlist): HymnalEvent

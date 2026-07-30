@@ -18,4 +18,6 @@ object NavigationScreens {
     object Hymn: Screen("Hymn")
     @Serializable
     object Settings: Screen("Settings")
+    @Serializable
+    object Hymnals: Screen("")
 }

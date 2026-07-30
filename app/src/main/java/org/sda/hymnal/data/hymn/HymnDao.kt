@@ -2,7 +2,7 @@ package org.sda.hymnal.data.hymn
 
 import androidx.room3.Dao
 import androidx.room3.Query
-import androidx.room3.Update
+import androidx.room3.Upsert
 
 @Dao
 interface HymnDao {
@@ -36,6 +36,11 @@ interface HymnDao {
         query: String,
         hymnal: String
     ): MutableList<DbHymn>
-    @Update
+    @Upsert
     suspend fun setHymn(dbHymn: DbHymn)
+
+    @Query("""
+        DELETE FROM hymns WHERE hymnal = :hymnal
+    """)
+    suspend fun deleteHymnal(hymnal: String)
 }
