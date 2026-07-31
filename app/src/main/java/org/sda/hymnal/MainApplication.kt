@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -61,16 +62,17 @@ import org.sda.hymnal.screen.SettingsScreen
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("DiscouragedApi")
 @Composable
-fun MainApplication(hymnalViewModel: HymnalViewModel) {
+fun MainApplication(hymnalViewModel: HymnalViewModel, fromImport: Boolean = false) {
     val navController = rememberNavController()
     val hymnalState = hymnalViewModel.hymnalState.collectAsState()
     val isLoadingHymns = hymnalState.value.isLoadingHymns
 
-    LaunchedEffect(Unit) {
-        hymnalViewModel.viewModelScope.launch {
-            hymnalViewModel.onEvent(HymnalEvent.LoadSettings)
+    LaunchedEffect(isLoadingHymns) {
+        if (isLoadingHymns) {
+            hymnalViewModel.viewModelScope.launch {
+                hymnalViewModel.onEvent(HymnalEvent.LoadSettings)
+            }
         }
-
     }
     if (isLoadingHymns) {
         Column(
@@ -98,7 +100,8 @@ fun MainApplication(hymnalViewModel: HymnalViewModel) {
             navController = navController,
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background),
-            startDestination = NavigationScreens.Home,
+            startDestination = if (!fromImport) {NavigationScreens.Home} else {
+                NavigationScreens.Hymnals},
 //            enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start) },
 //            exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Start) },
 //            popEnterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.End) },
@@ -262,9 +265,22 @@ fun MainApplication(hymnalViewModel: HymnalViewModel) {
                         navController.navigateUp()
                     },
                     hymnals = hymnalState.value.hymnals,
-                    setHymnalUri = { hymnalUri ->
+                    importHymnal = { hymnalUri ->
                         hymnalViewModel.onEvent(HymnalEvent.AddHymnal(hymnalUri))
-                    }
+                    },
+                    removeHymnal = { hymnal ->
+                        hymnalViewModel.onEvent(HymnalEvent.RemoveHymnal(hymnal))
+                    },
+                    hymnalsImportState = hymnalState.value.hymnalsImportState,
+                    setImportState = {
+                        hymnalViewModel.onEvent(HymnalEvent.SetImportState(it))
+                    },
+                    setImportUri = { uri ->
+                        hymnalViewModel.onEvent(HymnalEvent.SetImportUri(uri))
+                    },
+                    hymnalUri = hymnalState.value.hymnalImportUri,
+                    fromImport = fromImport,
+                    hymnalCurrentlyRemoving = hymnalState.value.hymnalCurrentlyRemoving
                 )
             }
             screen(
@@ -469,6 +485,7 @@ fun BottomHymnalBar(
 fun HymnalTopBar(
     title: String,
     onClickBack: () -> Unit,
+    showClickBack: Boolean = true,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     TopAppBar(
@@ -477,13 +494,17 @@ fun HymnalTopBar(
         },
         scrollBehavior = scrollBehavior,
         navigationIcon = {
-            IconButton(
-                onClick = onClickBack
+            AnimatedVisibility(
+                visible = showClickBack
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                    contentDescription = stringResource(R.string.icon_back)
-                )
+                IconButton(
+                    onClick = onClickBack
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                        contentDescription = stringResource(R.string.icon_back)
+                    )
+                }
             }
         }
     )

@@ -55,4 +55,7 @@
     <string name="hymnals_manage">Manage Hymnals</string>
     <string name="hymnals_import">Import hymnal</string>
     <string name="hymnals_already_exists">Hymnal already exists with id \"%1$s\"</string>
+    <string name="hymnals_error_parsing">Error parsing hymnal.json</string>
+    <string name="hymnals_import_close">Close</string>
+    <string name="hymnals_remove">Remove hymnal</string>
 </resources>

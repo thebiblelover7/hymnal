@@ -1,6 +1,5 @@
 package org.sda.hymnal
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,7 +12,6 @@ import org.sda.hymnal.ui.theme.HymnalTheme
 
 
 @Suppress("UNCHECKED_CAST")
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 class MainActivity : ComponentActivity() {
     private val hymnalViewModel by viewModels<HymnalViewModel>(
         factoryProducer = {

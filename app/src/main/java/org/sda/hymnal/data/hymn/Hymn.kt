@@ -5,6 +5,7 @@ import androidx.room3.Entity
 import androidx.room3.Fts5
 import androidx.room3.FtsOptions
 import org.sda.hymnal.data.hymnal.Hymnal
+import java.io.File
 
 val hymnTags = listOf("1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.", "10.", "CHORUS:", "Refrain", "Coro", "Côro:", "Припев:")
 val hymnTagsExpression = hymnTags.joinToString(
@@ -21,7 +22,8 @@ data class Hymn(
     val sheetMusic: List<Int> = emptyList(),
     val favorite: Boolean = false,
     val sheetMusicStr: String = "",     // Basically only used for conversion back to DbHymn
-    val firstLine: String
+    val firstLine: String,
+    val sheetMusicFiles: List<File?> = emptyList()
 )
 
 @Entity(

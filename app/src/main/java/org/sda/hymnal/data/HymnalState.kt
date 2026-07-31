@@ -1,5 +1,6 @@
 package org.sda.hymnal.data
 
+import android.net.Uri
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -7,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import org.sda.hymnal.data.hymn.Hymn
 import org.sda.hymnal.data.hymnal.DefaultHymnals
 import org.sda.hymnal.data.hymnal.Hymnal
+import org.sda.hymnal.data.hymnal.HymnalsImportConditions
 import org.sda.hymnal.data.playlist.Playlist
 import org.sda.hymnal.data.playlist.PlaylistHymn
 import org.sda.hymnal.data.setting.Settings
@@ -14,7 +16,10 @@ import org.sda.hymnal.screen.NavigationScreens
 import org.sda.hymnal.screen.Screen
 
 data class HymnalState(
-    val hymnals: MutableList<Hymnal> = mutableListOf(),
+    val hymnals: SnapshotStateList<Hymnal> = mutableStateListOf(),
+    val hymnalCurrentlyRemoving: Hymnal? = null,
+    val hymnalsImportState: HymnalsImportConditions.State = HymnalsImportConditions.State.NONE,
+    val hymnalImportUri: Uri? = null,
     val currentScreen: Screen = NavigationScreens.Home,
     val currentHymn: Hymn? = null,
     val currentHymnPair: Pair<Hymn, PlaylistHymn?>? = null,

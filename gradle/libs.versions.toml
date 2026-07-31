@@ -1,5 +1,6 @@
 [versions]
 agp = "9.3.1"
+coilCompose = "3.5.0"
 kotlin = "2.3.20"
 coreKtx = "1.18.0"
 junit = "4.13.2"
@@ -16,6 +17,7 @@ material3 = "1.5.0-alpha16"
 room3 = "3.0.0"
 sqlite = "2.7.0"
 zoomable = "0.18.0"
+zoomableImageCoil3 = "0.19.0"
 
 [libraries]
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
@@ -23,6 +25,7 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-room-runtime = { module = "androidx.room3:room3-runtime", version.ref = "room3" }
 androidx-room-compiler = { module = "androidx.room3:room3-compiler", version.ref = "room3" }
 androidx-sqlite = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -42,6 +45,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3",
 lazycolumnscrollbar = { module = "com.github.nanihadesuka:LazyColumnScrollbar", version.ref = "lazycolumnscrollbar" }
 zoomable = { module = "me.saket.telephoto:zoomable", version.ref = "zoomable" }
 androidx-room3-common-jvm = { group = "androidx.room3", name = "room3-common-jvm", version.ref = "room3" }
+zoomable-image-coil3 = { module = "me.saket.telephoto:zoomable-image-coil3", version.ref = "zoomableImageCoil3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
