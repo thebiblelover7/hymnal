@@ -43,6 +43,6 @@ jobs:
         uses: actions/upload-artifact@v4.6.2
         with:
           name: hymnal-nightly.apk
-          path: ./app/build/outputs/apk/release/app-release.apk
+          path: ./app/release/app-release.apk
           compression-level: 0
         
