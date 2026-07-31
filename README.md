@@ -12,6 +12,14 @@ height="55">](https://play.google.com/store/apps/details?id=org.sda.hymnal)
 
 Download the app from [GitHub Releases](https://github.com/thebiblelover7/hymnal/releases) or [Google Play](https://play.google.com/store/apps/details?id=org.sda.hymnal). The GitHub and Google Play versions are not interchangeable as they are signed with different keys.
 
+## Features
+* Speed dial by hymn number
+* Fast search in hymn text and titles
+* Playlist feature for church service liturgy etc.
+* Favorites
+* Hymnal import feature (make your own hymnals)
+* Font size adjustments
+
 ## Contribute
 ### Issues
 If you have any issues, feature suggestions or bugs, please let us know by submitting an issue [here on GitHub](https://github.com/thebiblelover7/hymnal/issues). We'd love to hear from you!

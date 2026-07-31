@@ -73,6 +73,8 @@ import androidx.compose.ui.zIndex
 import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.ZoomableContentLocation
+import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
+import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
 import org.sda.hymnal.HymnalTopBar
@@ -99,7 +101,8 @@ fun HymnScreen(
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val bottomBarScrollBehavior = FloatingToolbarDefaults.exitAlwaysScrollBehavior(
-        FloatingToolbarExitDirection.Bottom)
+        FloatingToolbarExitDirection.Bottom
+    )
     Scaffold(
         snackbarHost = snackbarHost,
         modifier = Modifier
@@ -108,7 +111,7 @@ fun HymnScreen(
             .nestedScroll(bottomBarScrollBehavior),
         topBar = {
             HymnalTopBar(
-                title = stringResource(R.string.hymn) + " "+ hymn.number.toString(),
+                title = stringResource(R.string.hymn) + " " + hymn.number.toString(),
                 onClickBack = onClickBack,
                 scrollBehavior = topAppBarScrollBehavior
             )
@@ -117,7 +120,8 @@ fun HymnScreen(
 
         }
     ) { padding ->
-        val pagerState = rememberPagerState { hymn.sheetMusic.size }
+        val pagerState =
+            rememberPagerState { if (hymn.hymnal.userAdded) hymn.sheetMusicFiles.size else hymn.sheetMusic.size }
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -147,9 +151,21 @@ fun HymnScreen(
                         transitionSpec = {
                             val forward = targetState.second.first > initialState.second.first
                             (fadeIn() + slideInHorizontally(
-                                initialOffsetX = { fullWidth -> if(forward) { fullWidth } else {-fullWidth} })).togetherWith(
+                                initialOffsetX = { fullWidth ->
+                                    if (forward) {
+                                        fullWidth
+                                    } else {
+                                        -fullWidth
+                                    }
+                                })).togetherWith(
                                 exit = fadeOut() + slideOutHorizontally(
-                                    targetOffsetX = { fullWidth -> if(forward) { -fullWidth } else { fullWidth } }
+                                    targetOffsetX = { fullWidth ->
+                                        if (forward) {
+                                            -fullWidth
+                                        } else {
+                                            fullWidth
+                                        }
+                                    }
                                 )
                             )
                         },
@@ -215,9 +231,21 @@ fun HymnScreen(
                         transitionSpec = {
                             val forward = targetState.second.first > initialState.second.first
                             (fadeIn() + slideInHorizontally(
-                                initialOffsetX = { fullWidth -> if(forward) { fullWidth } else {-fullWidth} })).togetherWith(
+                                initialOffsetX = { fullWidth ->
+                                    if (forward) {
+                                        fullWidth
+                                    } else {
+                                        -fullWidth
+                                    }
+                                })).togetherWith(
                                 exit = fadeOut() + slideOutHorizontally(
-                                    targetOffsetX = { fullWidth -> if(forward) { -fullWidth } else { fullWidth } }
+                                    targetOffsetX = { fullWidth ->
+                                        if (forward) {
+                                            -fullWidth
+                                        } else {
+                                            fullWidth
+                                        }
+                                    }
                                 )
                             )
                         },
@@ -236,14 +264,24 @@ fun HymnScreen(
                                     .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
                                     .nestedScroll(bottomBarScrollBehavior)
                             ) { page ->
-                                val resource = if (page < hymn.sheetMusic.size) hymn.sheetMusic[page] else 0
+                                val resource = if (page < hymn.sheetMusic.size) {
+                                    if (!hymn.hymnal.userAdded) {
+                                        hymn.sheetMusic[page]
+                                    } else {
+                                        0
+                                    }
+                                } else {
+                                    0
+                                }
                                 if (resource != 0) {
                                     val painter = painterResource(resource)
                                     val zoomableState = rememberZoomableState(
                                         zoomSpec = ZoomSpec(maxZoomFactor = 4f)
                                     ).apply {
                                         setContentLocation(
-                                            ZoomableContentLocation.scaledInsideAndCenterAligned(painter.intrinsicSize)
+                                            ZoomableContentLocation.scaledInsideAndCenterAligned(
+                                                painter.intrinsicSize
+                                            )
                                         )
                                     }
                                     var showToolbar by remember { mutableStateOf(true) }
@@ -299,6 +337,64 @@ fun HymnScreen(
                                             )
                                             .fillMaxSize()
                                     )
+                                } else if (hymn.hymnal.userAdded && hymn.sheetMusicFiles[page] != null) {
+                                    val model = hymn.sheetMusicFiles[page]
+                                    val zoomableState = rememberZoomableState(
+                                        zoomSpec = ZoomSpec(maxZoomFactor = 8f)
+                                    )
+                                    val zoomableImageState =
+                                        rememberZoomableImageState(zoomableState = zoomableState)
+                                    var showToolbar by remember { mutableStateOf(true) }
+                                    LaunchedEffect(zoomableState.zoomFraction) {
+                                        snapshotFlow { zoomableState.zoomFraction }
+                                            .collect { fraction ->
+                                                val isZoomed = (fraction ?: -1f) > 0f
+                                                showToolbar = !isZoomed
+                                            }
+                                    }
+                                    LaunchedEffect(showToolbar) {
+                                        snapshotFlow { showToolbar }.collect { showToolbar ->
+                                            val targetBottomOffset = if (showToolbar) {
+                                                0f
+                                            } else {
+                                                bottomBarScrollBehavior.state.offsetLimit
+                                            }
+                                            val targetTopOffset = if (showToolbar) {
+                                                0f
+                                            } else {
+                                                topAppBarScrollBehavior.state.heightOffsetLimit
+                                            }
+                                            launch {
+                                                animate(
+                                                    initialValue = bottomBarScrollBehavior.state.offset,
+                                                    targetValue = targetBottomOffset
+                                                ) { value, _ ->
+                                                    bottomBarScrollBehavior.state.offset = value
+                                                }
+                                            }
+                                            launch {
+                                                animate(
+                                                    initialValue = topAppBarScrollBehavior.state.heightOffset,
+                                                    targetValue = targetTopOffset
+                                                ) { value, _ ->
+                                                    topAppBarScrollBehavior.state.heightOffset =
+                                                        value
+                                                }
+                                            }
+                                        }
+                                    }
+                                    ZoomableAsyncImage(
+                                        model = model,
+                                        contentDescription = stringResource(R.string.icon_sheet_music),
+                                        alignment = Alignment.Center,
+                                        contentScale = ContentScale.Fit,
+                                        state = zoomableImageState,
+                                        onClick = {
+                                            showToolbar = !showToolbar
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                    )
                                 }
                             }
                         }
@@ -345,7 +441,11 @@ fun HymnScreenBottomBar(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         repeat(pagerState.pageCount) { iteration ->
-                            val animatedColor = animateColorAsState(if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
+                            val animatedColor = animateColorAsState(
+                                if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.secondary.copy(
+                                    alpha = 0.4f
+                                )
+                            )
                             Box(
                                 modifier = Modifier
                                     .padding(2.dp)
@@ -436,7 +536,7 @@ fun HymnScreenBottomBar(
                             strLyrics
                         },
                         enabled = if (isLyricsScreen) {
-                            hymn.sheetMusic.isNotEmpty()
+                            hymn.sheetMusic.isNotEmpty() || hymn.sheetMusicFiles.isNotEmpty()
                         } else {
                             true
                         }

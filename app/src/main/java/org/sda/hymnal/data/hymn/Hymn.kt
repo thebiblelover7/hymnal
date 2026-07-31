@@ -4,43 +4,26 @@ import androidx.room3.ColumnInfo
 import androidx.room3.Entity
 import androidx.room3.Fts5
 import androidx.room3.FtsOptions
-import kotlinx.serialization.json.Json
 import org.sda.hymnal.data.hymnal.Hymnal
-import org.sda.hymnal.data.hymnal.hymnalList
+import java.io.File
 
-class HymnConverter {
-    fun convertToHymn(dbHymn: DbHymn): Hymn {
-        val sheetsStr: List<String> = Json.decodeFromString(dbHymn.sheetMusic)
-        val sheetsInt = sheetsStr.map { sheetPath ->
-            getSheetMusicResource(sheetPath)
-        }
-        return Hymn(
-            title = dbHymn.title,
-            hymnal = hymnalList.find { it.fileName == dbHymn.hymnal }!!,
-            number = dbHymn.number,
-            text = dbHymn.text,
-            sheetMusic = sheetsInt,
-            sheetMusicStr = dbHymn.sheetMusic,
-            favorite = dbHymn.favorite,
-            firstLine = dbHymn.firstLine
-        )
-    }
-
-    fun convertToDbHymn(hymn: Hymn): DbHymn {
-        return DbHymn(
-            hymnal = hymn.hymnal.fileName,
-            number = hymn.number,
-            title = hymn.title,
-            favorite = hymn.favorite,
-            sheetMusic = hymn.sheetMusicStr,
-            text = hymn.text,
-            firstLine = hymn.firstLine
-        )
-    }
-}
-
-
-val hymnTags = listOf("1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.", "10.", "CHORUS:", "Refrain", "Coro", "Côro:", "Припев:")
+val hymnTags = listOf(
+    "1.",
+    "2.",
+    "3.",
+    "4.",
+    "5.",
+    "6.",
+    "7.",
+    "8.",
+    "9.",
+    "10.",
+    "CHORUS:",
+    "Refrain",
+    "Coro",
+    "Côro:",
+    "Припев:"
+)
 val hymnTagsExpression = hymnTags.joinToString(
     prefix = "WHEN line1 LIKE '",
     separator = "' OR line1 LIKE '",
@@ -54,8 +37,9 @@ data class Hymn(
     val text: String,
     val sheetMusic: List<Int> = emptyList(),
     val favorite: Boolean = false,
-    val sheetMusicStr: String = "",
-    val firstLine: String
+    val sheetMusicStr: String = "",     // Basically only used for conversion back to DbHymn
+    val firstLine: String,
+    val sheetMusicFiles: List<File?> = emptyList()
 )
 
 @Entity(

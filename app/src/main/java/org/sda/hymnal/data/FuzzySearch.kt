@@ -9,26 +9,26 @@ import java.text.Normalizer
 
 fun String.removeExtraMarks() =
     Normalizer.normalize(this, Normalizer.Form.NFD)
-    .replace("\\p{Mn}+".toRegex(), "")
+        .replace("\\p{Mn}+".toRegex(), "")
 
 object FuzzySearch {
     fun levenshteinDistance(a: String, b: String): Int {
         val m = a.length
         val n = b.length
-        val dp = Array(m + 1) { IntArray(n+1) }
+        val dp = Array(m + 1) { IntArray(n + 1) }
 
         for (i in 0..m) dp[i][0] = i
         for (j in 0..n) dp[0][j] = j
 
         for (i in 1..m) {
             for (j in 1..n) {
-                dp[i][j] = if (a[i-1] == b[j-1]) {
-                    dp [i-1][j-1]
+                dp[i][j] = if (a[i - 1] == b[j - 1]) {
+                    dp[i - 1][j - 1]
                 } else {
                     1 + minOf(
-                        dp[i-1][j], 	    // deletion
-                        dp[i][j-1],		// insertion
-                        dp[i-1][j-1]	    // substitution
+                        dp[i - 1][j],        // deletion
+                        dp[i][j - 1],        // insertion
+                        dp[i - 1][j - 1]        // substitution
                     )
                 }
             }
@@ -72,13 +72,17 @@ object FuzzySearch {
 
         return items
             .map { item ->
-                val titleScore = similarityScore(query.removeExtraMarks(), titleSelector(item).removeExtraMarks())
-                val bodyScore = similarityScore(query.removeExtraMarks(), bodySelector(item).removeExtraMarks())
+                val titleScore = similarityScore(
+                    query.removeExtraMarks(),
+                    titleSelector(item).removeExtraMarks()
+                )
+                val bodyScore =
+                    similarityScore(query.removeExtraMarks(), bodySelector(item).removeExtraMarks())
                 val weightedScore = (titleScore * titleWeight) + (bodyScore * bodyWeight)
                 item to weightedScore
             }
             .filter { (_, score) -> score >= threshold }
             .sortedByDescending { (_, score) -> score }
-            .map { (item, _) -> item}
+            .map { (item, _) -> item }
     }
 }

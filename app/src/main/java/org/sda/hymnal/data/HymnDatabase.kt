@@ -10,6 +10,8 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import org.sda.hymnal.data.hymn.DbHymn
 import org.sda.hymnal.data.hymn.DbHymnFTS
 import org.sda.hymnal.data.hymn.HymnDao
+import org.sda.hymnal.data.hymnal.Hymnal
+import org.sda.hymnal.data.hymnal.HymnalDao
 import org.sda.hymnal.data.playlist.Playlist
 import org.sda.hymnal.data.playlist.PlaylistDao
 import org.sda.hymnal.data.playlist.PlaylistHymn
@@ -18,8 +20,8 @@ import org.sda.hymnal.data.setting.SettingDao
 import org.sda.hymnal.data.setting.Settings
 
 @Database(
-    entities = [DbHymn::class, DbHymnFTS::class, Settings::class, Playlist::class, PlaylistHymn::class],
-    version = 5,
+    entities = [DbHymn::class, DbHymnFTS::class, Settings::class, Playlist::class, PlaylistHymn::class, Hymnal::class],
+    version = 6,
     autoMigrations = [
         AutoMigration(      // Add FTS5 table for search
             from = 1,
@@ -40,15 +42,22 @@ import org.sda.hymnal.data.setting.Settings
             from = 4,
             to = 5,
             spec = Migrations.AutoMigrationRebuildFts::class
+        ),
+        AutoMigration(      // Add hymnals table to support adding custom hymnals
+            from = 5,
+            to = 6,
+            spec = Migrations.AutoMigration5To6::class
         )
     ]
 )
 abstract class HymnDatabase : RoomDatabase() {
     abstract val hymnDao: HymnDao
+    abstract val hymnalDao: HymnalDao
 
     abstract val settingDao: SettingDao
     abstract val playlistDao: PlaylistDao
     abstract val playlistHymnDao: PlaylistHymnDao
+
     companion object {
         @Volatile
         private var Instance: HymnDatabase? = null
@@ -63,12 +72,12 @@ abstract class HymnDatabase : RoomDatabase() {
                     .addCallback(object : Callback() {
                         override suspend fun onCreate(connection: SQLiteConnection) {
                             super.onCreate(connection)
-                            connection.prepare("INSERT INTO hymns_fts(hymns_fts) VALUES('rebuild')").use { statement ->
-                                statement.step()
-                            }
+                            connection.prepare("INSERT INTO hymns_fts(hymns_fts) VALUES('rebuild')")
+                                .use { statement ->
+                                    statement.step()
+                                }
                         }
                     })
-                    .fallbackToDestructiveMigration()
                     .build()
                     .also { Instance = it }
             }

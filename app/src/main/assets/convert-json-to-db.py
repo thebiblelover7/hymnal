@@ -4,6 +4,8 @@ import os
 import re
 
 
+database_version = 5
+
 connection = sqlite3.connect("hymns.db")
 cursor = connection.cursor()
 
@@ -127,6 +129,16 @@ cursor.execute("""
                 	)
                 )
 """)
+
+cursor.execute("""
+    CREATE VIRTUAL TABLE "hymns_fts" USING fts5(title, first_line, text, content=`hymns`, tokenize=`unicode61`)
+""")
+
+cursor.execute("""
+    INSERT INTO hymns_fts(hymns_fts) VALUES('rebuild')
+""")
+
+cursor.execute(f"PRAGMA user_version = {database_version}")
 
 connection.commit()
 connection.close()

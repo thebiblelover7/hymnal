@@ -64,7 +64,8 @@ import org.sda.hymnal.data.hymn.Hymn
 import org.sda.hymnal.data.playlist.PlaylistHymn
 import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class,
     FlowPreview::class
 )
 @Composable
@@ -159,11 +160,12 @@ fun ListScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    items(searchResults, key = {"${it.number} ${it.hymnal.fileName}"}) { hymn ->
+                    items(searchResults, key = { "${it.number} ${it.hymnal.fileName}" }) { hymn ->
                         HymnListItem(
                             hymnPair = Pair(hymn, null),
-                            modifier = Modifier.animateItem()
-                                .clickable(onClick = {onHymnClick(Pair(hymn, null))}),
+                            modifier = Modifier
+                                .animateItem()
+                                .clickable(onClick = { onHymnClick(Pair(hymn, null)) }),
                         )
                     }
                 }
@@ -192,18 +194,19 @@ fun ListScreen(
             ),
             indicatorContent = { index, isThumbSelected ->
                 AnimatedVisibility(
-                    enter = fadeIn() + slideInHorizontally(initialOffsetX = {it / 2}),
-                    exit = fadeOut() + slideOutHorizontally(targetOffsetX = {it / 2}),
+                    enter = fadeIn() + slideInHorizontally(initialOffsetX = { it / 2 }),
+                    exit = fadeOut() + slideOutHorizontally(targetOffsetX = { it / 2 }),
                     visible = isThumbSelected,
                     modifier = Modifier.padding(horizontal = 10.dp)
                 ) {
                     Text(
                         text = "${hymns[index].first.number}",
                         color = MaterialTheme.colorScheme.onSecondary,
-                        modifier = Modifier.background(
-                            color = MaterialTheme.colorScheme.secondary.copy(0.8f),
-                            shape = CircleShape
-                        )
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.secondary.copy(0.8f),
+                                shape = CircleShape
+                            )
                             .padding(horizontal = 10.dp, vertical = 5.dp)
                     )
                 }
@@ -219,8 +222,9 @@ fun ListScreen(
                 items(hymns) { hymn ->
                     HymnListItem(
                         hymnPair = hymn,
-                        modifier = Modifier.animateItem()
-                            .clickable(onClick = {onHymnClick(hymn)}),
+                        modifier = Modifier
+                            .animateItem()
+                            .clickable(onClick = { onHymnClick(hymn) }),
                     )
                 }
             }
