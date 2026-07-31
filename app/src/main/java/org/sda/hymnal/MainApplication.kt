@@ -100,8 +100,11 @@ fun MainApplication(hymnalViewModel: HymnalViewModel, fromImport: Boolean = fals
             navController = navController,
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background),
-            startDestination = if (!fromImport) {NavigationScreens.Home} else {
-                NavigationScreens.Hymnals},
+            startDestination = if (!fromImport) {
+                NavigationScreens.Home
+            } else {
+                NavigationScreens.Hymnals
+            },
 //            enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start) },
 //            exitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Start) },
 //            popEnterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.End) },
@@ -128,8 +131,8 @@ fun MainApplication(hymnalViewModel: HymnalViewModel, fromImport: Boolean = fals
                     },
                     onHymnSubmit = {
                         if (hymnalState.value.currentSearchHymn != null
-                            && hymnalState.value.currentHymnPair?.first == hymnalState.value.currentSearchHymn)
-                        {
+                            && hymnalState.value.currentHymnPair?.first == hymnalState.value.currentSearchHymn
+                        ) {
                             hymnalViewModel.onEvent(HymnalEvent.SetInPlaylist(false))
                             navController.navigate(NavigationScreens.Hymn)
                         } else {
@@ -228,10 +231,21 @@ fun MainApplication(hymnalViewModel: HymnalViewModel, fromImport: Boolean = fals
                     },
                     playlist = hymnalState.value.currentPlaylist ?: return@homeScreen,
                     onRemoveClick = { hymnPair, playlist ->
-                        hymnalViewModel.onEvent(HymnalEvent.RemoveHymnFromPlaylist(hymnPair, playlist))
+                        hymnalViewModel.onEvent(
+                            HymnalEvent.RemoveHymnFromPlaylist(
+                                hymnPair,
+                                playlist
+                            )
+                        )
                     },
                     onMoveClick = { hymnPair, playlist, moveBy ->
-                        hymnalViewModel.onEvent(HymnalEvent.MoveHymnInPlaylist(hymnPair, playlist, moveBy))
+                        hymnalViewModel.onEvent(
+                            HymnalEvent.MoveHymnInPlaylist(
+                                hymnPair,
+                                playlist,
+                                moveBy
+                            )
+                        )
                     }
                 )
             }
@@ -251,7 +265,7 @@ fun MainApplication(hymnalViewModel: HymnalViewModel, fromImport: Boolean = fals
                         navController.navigate(NavigationScreens.Hymnals)
                     },
                     onFontSizeSet = { fontSize ->
-                    hymnalViewModel.onEvent(HymnalEvent.SetFontSize(fontSize))
+                        hymnalViewModel.onEvent(HymnalEvent.SetFontSize(fontSize))
                     }
                 )
             }
@@ -296,35 +310,59 @@ fun MainApplication(hymnalViewModel: HymnalViewModel, fromImport: Boolean = fals
                     hymn = hymnalState.value.currentHymnPair?.first ?: return@screen,
 //                    hymnPosition = if (hymnalState.value.isInPlaylist) hymnalState.value.,
                     hymnIndex = if (hymnalState.value.isInPlaylist) {
-                        Pair(hymnalState.value.currentHymnPair?.second?.position ?: return@screen, hymnalState.value.currentPlaylist?.count ?: return@screen)
+                        Pair(
+                            hymnalState.value.currentHymnPair?.second?.position ?: return@screen,
+                            hymnalState.value.currentPlaylist?.count ?: return@screen
+                        )
                     } else {
-                        Pair(hymnalState.value.currentHymnPair?.first?.number ?: return@screen, hymnalState.value.currentHymns.size)
+                        Pair(
+                            hymnalState.value.currentHymnPair?.first?.number ?: return@screen,
+                            hymnalState.value.currentHymns.size
+                        )
                     },
 //                    hymnTotal = hymnalState.value.currentHymns.size,
                     isLyricsScreen = hymnalState.value.isLyricsScreen,
                     onPreviousHymnClick = {
                         if (hymnalState.value.isInPlaylist) {
-                            val index = hymnalState.value.currentPlaylistPair.indexOf(hymnalState.value.currentHymnPair)
+                            val index =
+                                hymnalState.value.currentPlaylistPair.indexOf(hymnalState.value.currentHymnPair)
                             if (index != -1 && index > 0) {
                                 hymnalViewModel.onEvent(HymnalEvent.SetCurrentHymn(hymnalState.value.currentPlaylistPair[index - 1]))
                             }
                         } else {
-                            val index = hymnalState.value.currentHymns.indexOf(hymnalState.value.currentHymnPair?.first)
+                            val index =
+                                hymnalState.value.currentHymns.indexOf(hymnalState.value.currentHymnPair?.first)
                             if (index != -1 && index > 0) {
-                                hymnalViewModel.onEvent(HymnalEvent.SetCurrentHymn(Pair(hymnalState.value.currentHymns[index - 1], null)))
+                                hymnalViewModel.onEvent(
+                                    HymnalEvent.SetCurrentHymn(
+                                        Pair(
+                                            hymnalState.value.currentHymns[index - 1],
+                                            null
+                                        )
+                                    )
+                                )
                             }
                         }
                     },
                     onNextHymnClick = {
                         if (hymnalState.value.isInPlaylist) {
-                            val index = hymnalState.value.currentPlaylistPair.indexOf(hymnalState.value.currentHymnPair)
+                            val index =
+                                hymnalState.value.currentPlaylistPair.indexOf(hymnalState.value.currentHymnPair)
                             if (index != -1 && index < hymnalState.value.currentPlaylistPair.size - 1) {
                                 hymnalViewModel.onEvent(HymnalEvent.SetCurrentHymn(hymnalState.value.currentPlaylistPair[index + 1]))
                             }
                         } else {
-                            val index = hymnalState.value.currentHymns.indexOf(hymnalState.value.currentHymnPair?.first)
+                            val index =
+                                hymnalState.value.currentHymns.indexOf(hymnalState.value.currentHymnPair?.first)
                             if (index != -1 && index < hymnalState.value.currentHymns.size - 1) {
-                                hymnalViewModel.onEvent(HymnalEvent.SetCurrentHymn(Pair(hymnalState.value.currentHymns[index + 1], null)))
+                                hymnalViewModel.onEvent(
+                                    HymnalEvent.SetCurrentHymn(
+                                        Pair(
+                                            hymnalState.value.currentHymns[index + 1],
+                                            null
+                                        )
+                                    )
+                                )
                             }
                         }
                     },

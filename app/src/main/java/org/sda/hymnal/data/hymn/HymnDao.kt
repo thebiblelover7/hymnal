@@ -15,15 +15,18 @@ interface HymnDao {
     @Query("SELECT * FROM hymns WHERE hymnal = :hymnal")
     fun getHymnal(hymnal: String): MutableList<DbHymn>
 
-    @Query("""
+    @Query(
+        """
         SELECT *
         FROM hymns
         JOIN hymns_fts ON hymns.rowid = hymns_fts.rowid
         WHERE hymns_fts MATCH :searchQuery
-    """)
+    """
+    )
     suspend fun searchHymns(searchQuery: String): MutableList<DbHymn>
 
-    @Query("""
+    @Query(
+        """
         SELECT *, bm25(hymns_fts, 10.0, 5.0, 1.0) AS score
         FROM hymns
         JOIN hymns_fts ON hymns.rowid = hymns_fts.rowid
@@ -31,16 +34,20 @@ interface HymnDao {
             AND hymns_fts MATCH :query
         ORDER BY 
             score
-    """)
+    """
+    )
     suspend fun searchBMHymns(
         query: String,
         hymnal: String
     ): MutableList<DbHymn>
+
     @Upsert
     suspend fun setHymn(dbHymn: DbHymn)
 
-    @Query("""
+    @Query(
+        """
         DELETE FROM hymns WHERE hymnal = :hymnal
-    """)
+    """
+    )
     suspend fun deleteHymnal(hymnal: String)
 }

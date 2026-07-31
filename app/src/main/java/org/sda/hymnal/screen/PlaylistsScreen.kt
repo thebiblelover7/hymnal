@@ -68,7 +68,7 @@ fun PlaylistsScreen(
     onPlaylistDeleteClick: (playlist: Playlist) -> Unit,
 ) {
     var createPlaylistDialog by remember { mutableStateOf(false) }
-    var renamingPlaylist by remember {mutableStateOf<Playlist?>(null)}
+    var renamingPlaylist by remember { mutableStateOf<Playlist?>(null) }
     var renamePlaylistDialog by remember { mutableStateOf(false) }
     Scaffold(
         snackbarHost = snackbarHost,
@@ -83,7 +83,7 @@ fun PlaylistsScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {createPlaylistDialog = true}
+                onClick = { createPlaylistDialog = true }
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.icon_add))
             }
@@ -117,7 +117,11 @@ fun PlaylistsScreen(
                         renamePlaylistDialog = visible
                     },
                     enterString = stringResource(R.string.dialog_rename),
-                    startingText = if (renamingPlaylist != null) {renamingPlaylist!!.name} else {""}
+                    startingText = if (renamingPlaylist != null) {
+                        renamingPlaylist!!.name
+                    } else {
+                        ""
+                    }
                 )
             }
             LazyColumnScrollbar(
@@ -146,7 +150,9 @@ fun PlaylistsScreen(
                             rawPlaylist.copy(
                                 name = stringResource(R.string.favorites)
                             )
-                        } else {rawPlaylist}
+                        } else {
+                            rawPlaylist
+                        }
                         PlaylistItem(
                             playlist = playlist,
                             onPlaylistClick = onPlaylistClick,
@@ -171,7 +177,7 @@ fun PlaylistDropdownMenu(
     var expanded by remember { mutableStateOf(false) }
     Box {
         IconButton(
-            onClick = { expanded = !expanded}
+            onClick = { expanded = !expanded }
         ) {
             Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.icon_more))
         }
@@ -186,7 +192,7 @@ fun PlaylistDropdownMenu(
                         contentDescription = stringResource(R.string.rename_playlist)
                     )
                 },
-                text = {Text(stringResource(R.string.rename_playlist))},
+                text = { Text(stringResource(R.string.rename_playlist)) },
                 onClick = {
                     onPlaylistRenameClick()
                     expanded = false
@@ -199,7 +205,7 @@ fun PlaylistDropdownMenu(
                         contentDescription = stringResource(R.string.delete_playlist)
                     )
                 },
-                text = {Text(stringResource(R.string.delete_playlist))},
+                text = { Text(stringResource(R.string.delete_playlist)) },
                 onClick = {
                     onDeleteClick()
                     expanded = false
@@ -261,7 +267,11 @@ fun PlaylistHymnsScreen(
 //                contentPadding = padding,
                 state = listState
             ) {
-                items(hymns, key = { it.second?.id ?: "${it.first.number} ${it.first.hymnal.fileName}"}) { hymn ->
+                items(
+                    hymns,
+                    key = {
+                        it.second?.id ?: "${it.first.number} ${it.first.hymnal.fileName}"
+                    }) { hymn ->
                     val index = Pair(hymn.second?.position ?: 0, playlist.count)
                     HymnListItem(
                         hymnPair = hymn,
@@ -271,9 +281,17 @@ fun PlaylistHymnsScreen(
                                 onClick = { onHymnClick(hymn) }
                             ),
                         trailingContent = {
-                            val showMoveUp = if (hymn.second?.playlist != "favorites") {index.first > 1} else {false}
-                            val showMoveDown = if (hymn.second?.playlist != "favorites") {index.first < index.second} else {false}
-                            PlaylistHymnDropdownMenu (
+                            val showMoveUp = if (hymn.second?.playlist != "favorites") {
+                                index.first > 1
+                            } else {
+                                false
+                            }
+                            val showMoveDown = if (hymn.second?.playlist != "favorites") {
+                                index.first < index.second
+                            } else {
+                                false
+                            }
+                            PlaylistHymnDropdownMenu(
                                 onRemoveClick = { onRemoveClick(hymn, playlist) },
                                 onMoveClick = { moveBy ->
                                     onMoveClick(hymn, playlist, moveBy)
@@ -296,7 +314,7 @@ fun PlaylistDialog(
     startingText: String = "",
     enterString: String
 ) {
-    var playlistNameString by remember { mutableStateOf(startingText)}
+    var playlistNameString by remember { mutableStateOf(startingText) }
     AlertDialog(
         onDismissRequest = {
             onPlaylistDialogVisible(false)
@@ -328,7 +346,7 @@ fun PlaylistDialog(
             )
         },
         dismissButton = {
-            TextButton (
+            TextButton(
                 onClick = {
                     onPlaylistDialogVisible(false)
                     playlistNameString = startingText
@@ -336,7 +354,7 @@ fun PlaylistDialog(
             ) { Text(stringResource(R.string.dialog_close)) }
         },
         confirmButton = {
-            TextButton (
+            TextButton(
                 onClick = {
                     onPlaylistAddClick(playlistNameString)
                     onPlaylistDialogVisible(false)
@@ -417,7 +435,7 @@ fun PlaylistHymnDropdownMenu(
     var expanded by remember { mutableStateOf(false) }
     Box {
         IconButton(
-            onClick = { expanded = !expanded}
+            onClick = { expanded = !expanded }
         ) {
             Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.icon_more))
         }
@@ -432,7 +450,7 @@ fun PlaylistHymnDropdownMenu(
                         contentDescription = stringResource(R.string.remove_from_playlist)
                     )
                 },
-                text = {Text(stringResource(R.string.remove_from_playlist))},
+                text = { Text(stringResource(R.string.remove_from_playlist)) },
                 onClick = {
                     onRemoveClick()
                     expanded = false

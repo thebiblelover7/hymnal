@@ -101,7 +101,8 @@ fun HymnScreen(
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val bottomBarScrollBehavior = FloatingToolbarDefaults.exitAlwaysScrollBehavior(
-        FloatingToolbarExitDirection.Bottom)
+        FloatingToolbarExitDirection.Bottom
+    )
     Scaffold(
         snackbarHost = snackbarHost,
         modifier = Modifier
@@ -110,7 +111,7 @@ fun HymnScreen(
             .nestedScroll(bottomBarScrollBehavior),
         topBar = {
             HymnalTopBar(
-                title = stringResource(R.string.hymn) + " "+ hymn.number.toString(),
+                title = stringResource(R.string.hymn) + " " + hymn.number.toString(),
                 onClickBack = onClickBack,
                 scrollBehavior = topAppBarScrollBehavior
             )
@@ -119,7 +120,8 @@ fun HymnScreen(
 
         }
     ) { padding ->
-        val pagerState = rememberPagerState { if (hymn.hymnal.userAdded) hymn.sheetMusicFiles.size else hymn.sheetMusic.size }
+        val pagerState =
+            rememberPagerState { if (hymn.hymnal.userAdded) hymn.sheetMusicFiles.size else hymn.sheetMusic.size }
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -149,9 +151,21 @@ fun HymnScreen(
                         transitionSpec = {
                             val forward = targetState.second.first > initialState.second.first
                             (fadeIn() + slideInHorizontally(
-                                initialOffsetX = { fullWidth -> if(forward) { fullWidth } else {-fullWidth} })).togetherWith(
+                                initialOffsetX = { fullWidth ->
+                                    if (forward) {
+                                        fullWidth
+                                    } else {
+                                        -fullWidth
+                                    }
+                                })).togetherWith(
                                 exit = fadeOut() + slideOutHorizontally(
-                                    targetOffsetX = { fullWidth -> if(forward) { -fullWidth } else { fullWidth } }
+                                    targetOffsetX = { fullWidth ->
+                                        if (forward) {
+                                            -fullWidth
+                                        } else {
+                                            fullWidth
+                                        }
+                                    }
                                 )
                             )
                         },
@@ -217,9 +231,21 @@ fun HymnScreen(
                         transitionSpec = {
                             val forward = targetState.second.first > initialState.second.first
                             (fadeIn() + slideInHorizontally(
-                                initialOffsetX = { fullWidth -> if(forward) { fullWidth } else {-fullWidth} })).togetherWith(
+                                initialOffsetX = { fullWidth ->
+                                    if (forward) {
+                                        fullWidth
+                                    } else {
+                                        -fullWidth
+                                    }
+                                })).togetherWith(
                                 exit = fadeOut() + slideOutHorizontally(
-                                    targetOffsetX = { fullWidth -> if(forward) { -fullWidth } else { fullWidth } }
+                                    targetOffsetX = { fullWidth ->
+                                        if (forward) {
+                                            -fullWidth
+                                        } else {
+                                            fullWidth
+                                        }
+                                    }
                                 )
                             )
                         },
@@ -253,7 +279,9 @@ fun HymnScreen(
                                         zoomSpec = ZoomSpec(maxZoomFactor = 4f)
                                     ).apply {
                                         setContentLocation(
-                                            ZoomableContentLocation.scaledInsideAndCenterAligned(painter.intrinsicSize)
+                                            ZoomableContentLocation.scaledInsideAndCenterAligned(
+                                                painter.intrinsicSize
+                                            )
                                         )
                                     }
                                     var showToolbar by remember { mutableStateOf(true) }
@@ -314,7 +342,8 @@ fun HymnScreen(
                                     val zoomableState = rememberZoomableState(
                                         zoomSpec = ZoomSpec(maxZoomFactor = 8f)
                                     )
-                                    val zoomableImageState = rememberZoomableImageState(zoomableState = zoomableState)
+                                    val zoomableImageState =
+                                        rememberZoomableImageState(zoomableState = zoomableState)
                                     var showToolbar by remember { mutableStateOf(true) }
                                     LaunchedEffect(zoomableState.zoomFraction) {
                                         snapshotFlow { zoomableState.zoomFraction }
@@ -412,7 +441,11 @@ fun HymnScreenBottomBar(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         repeat(pagerState.pageCount) { iteration ->
-                            val animatedColor = animateColorAsState(if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
+                            val animatedColor = animateColorAsState(
+                                if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.secondary.copy(
+                                    alpha = 0.4f
+                                )
+                            )
                             Box(
                                 modifier = Modifier
                                     .padding(2.dp)

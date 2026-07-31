@@ -7,7 +7,23 @@ import androidx.room3.FtsOptions
 import org.sda.hymnal.data.hymnal.Hymnal
 import java.io.File
 
-val hymnTags = listOf("1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9.", "10.", "CHORUS:", "Refrain", "Coro", "Côro:", "Припев:")
+val hymnTags = listOf(
+    "1.",
+    "2.",
+    "3.",
+    "4.",
+    "5.",
+    "6.",
+    "7.",
+    "8.",
+    "9.",
+    "10.",
+    "CHORUS:",
+    "Refrain",
+    "Coro",
+    "Côro:",
+    "Припев:"
+)
 val hymnTagsExpression = hymnTags.joinToString(
     prefix = "WHEN line1 LIKE '",
     separator = "' OR line1 LIKE '",

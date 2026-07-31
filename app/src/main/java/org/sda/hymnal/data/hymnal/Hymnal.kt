@@ -35,6 +35,7 @@ class HymnalsImportConditions {
         REMOVING_FAILED,
         REMOVING_COMPLETED,
     }
+
     val failed = listOf(
         State.FAILED,
         State.FAILED_TO_PARSE,

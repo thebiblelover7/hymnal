@@ -10,23 +10,26 @@ abstract class Migrations {
     class AutoMigrationRebuildFts : AutoMigrationSpec {
         override suspend fun onPostMigrate(connection: SQLiteConnection) {
             super.onPostMigrate(connection)
-            connection.prepare("INSERT INTO hymns_fts(hymns_fts) VALUES('rebuild')").use { statement ->
-                statement.step()
-            }
+            connection.prepare("INSERT INTO hymns_fts(hymns_fts) VALUES('rebuild')")
+                .use { statement ->
+                    statement.step()
+                }
         }
     }
+
     class AutoMigration2To3 : AutoMigrationSpec {
         override suspend fun onPostMigrate(connection: SQLiteConnection) {
             super.onPostMigrate(connection)
             // This is a very complicated statement to add first lines from the text into a new column
-            connection.prepare("""
+            connection.prepare(
+                """
                 UPDATE hymns
                 SET first_line = (
                 	SELECT
                 		REPLACE(
                 			CASE """
-                    + hymnTagsExpression
-                    + """
+                        + hymnTagsExpression
+                        + """
                         THEN
                 					TRIM(SUBSTR(
                 						SUBSTR(text, INSTR(text || CHAR(10), CHAR(10)) + 1), 1, 50)
@@ -42,7 +45,8 @@ abstract class Migrations {
                 			TRIM(SUBSTR(text, 1, INSTR(text || CHAR(10), CHAR(10)) - 1)) AS line1
                 	)
                 )
-            """.trimIndent()).use { statement ->
+            """.trimIndent()
+            ).use { statement ->
                 statement.step()
             }
         }
@@ -55,7 +59,7 @@ abstract class Migrations {
                 prefix = "(",
                 separator = "), (",
                 postfix = ")"
-            ) { "\'${it.id}\', \'${it.fileName}\', ${it.version}, \'${it.title}\', ${it.userAdded}"  }
+            ) { "\'${it.id}\', \'${it.fileName}\', ${it.version}, \'${it.title}\', ${it.userAdded}" }
             val sqlStatement = """
                 INSERT INTO hymnals
                 VALUES """ + sqlValues.trimIndent()

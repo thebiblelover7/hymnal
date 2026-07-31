@@ -76,11 +76,12 @@ fun HymnalsScreen(
     hymnalsImportState: HymnalsImportConditions.State
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val fileLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (!fromImport) {
-            setImportUri(uri)
+    val fileLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (!fromImport) {
+                setImportUri(uri)
+            }
         }
-    }
     LaunchedEffect(hymnalUri) {
         Log.d("hymnals", "hymnalUri: $hymnalUri")
         if (hymnalUri != null) {
@@ -97,7 +98,11 @@ fun HymnalsScreen(
                 title = stringResource(R.string.hymnals_manage),
                 onClickBack = onClickBack,
                 scrollBehavior = topAppBarScrollBehavior,
-                showClickBack = if (fromImport) {false} else {!HymnalsImportConditions().progressing.contains(hymnalsImportState)}
+                showClickBack = if (fromImport) {
+                    false
+                } else {
+                    !HymnalsImportConditions().progressing.contains(hymnalsImportState)
+                }
             )
         },
         floatingActionButton = {
@@ -164,11 +169,13 @@ fun HymnalsScreen(
                     AnimatedContent(
                         targetState = hymnalsImportState,
                         contentAlignment = Alignment.Center,
-                        transitionSpec = { ContentTransform(
-                            targetContentEnter = fadeIn() + slideInVertically(),
-                            initialContentExit = fadeOut() + slideOutVertically(),
-                            sizeTransform = null
-                        ) }
+                        transitionSpec = {
+                            ContentTransform(
+                                targetContentEnter = fadeIn() + slideInVertically(),
+                                initialContentExit = fadeOut() + slideOutVertically(),
+                                sizeTransform = null
+                            )
+                        }
                     ) { hymnalsImportState ->
                         val text = when (hymnalsImportState) {
                             HymnalsImportConditions.State.NONE -> ""
@@ -217,7 +224,8 @@ fun HymnalsScreen(
                             Text("Yes, remove it")
                         }
                     }
-                    val removingCompleted = hymnalsImportState == HymnalsImportConditions.State.IMPORTING_REMOVING_COMPLETED
+                    val removingCompleted =
+                        hymnalsImportState == HymnalsImportConditions.State.IMPORTING_REMOVING_COMPLETED
                     LaunchedEffect(
                         removingCompleted
                     ) {
@@ -279,7 +287,7 @@ fun HymnalListItem(
             )
         },
         trailingContent = {
-            if (defaultHymnals.none{it.id == hymnal.id}) {
+            if (defaultHymnals.none { it.id == hymnal.id }) {
                 HymnalsDropdownMenu(
                     onRemoveClick = onRemoveClick
                 )
@@ -295,7 +303,7 @@ fun HymnalsDropdownMenu(
     var expanded by remember { mutableStateOf(false) }
     Box {
         IconButton(
-            onClick = { expanded = !expanded}
+            onClick = { expanded = !expanded }
         ) {
             Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.icon_more))
         }
@@ -310,7 +318,7 @@ fun HymnalsDropdownMenu(
                         contentDescription = stringResource(R.string.remove_from_playlist)
                     )
                 },
-                text = {Text(stringResource(R.string.hymnals_remove))},
+                text = { Text(stringResource(R.string.hymnals_remove)) },
                 onClick = {
                     onRemoveClick()
                     expanded = false

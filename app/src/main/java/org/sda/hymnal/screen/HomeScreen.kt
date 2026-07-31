@@ -145,7 +145,8 @@ fun HomeScreen(
                 }
             }
             Row(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
                     .requiredHeight(56.dp)
             ) {
                 HymnalDropdown(
@@ -164,7 +165,7 @@ fun HymnalDropdown(
     onHymnalClick: (hymnal: Hymnal) -> Unit,
     hymnals: List<Hymnal>
 ) {
-    val isDropdownOpen = remember{ mutableStateOf(false)}
+    val isDropdownOpen = remember { mutableStateOf(false) }
     Box {
         Row(
             modifier = Modifier

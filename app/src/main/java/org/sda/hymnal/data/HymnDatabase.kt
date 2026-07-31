@@ -57,6 +57,7 @@ abstract class HymnDatabase : RoomDatabase() {
     abstract val settingDao: SettingDao
     abstract val playlistDao: PlaylistDao
     abstract val playlistHymnDao: PlaylistHymnDao
+
     companion object {
         @Volatile
         private var Instance: HymnDatabase? = null
@@ -71,9 +72,10 @@ abstract class HymnDatabase : RoomDatabase() {
                     .addCallback(object : Callback() {
                         override suspend fun onCreate(connection: SQLiteConnection) {
                             super.onCreate(connection)
-                            connection.prepare("INSERT INTO hymns_fts(hymns_fts) VALUES('rebuild')").use { statement ->
-                                statement.step()
-                            }
+                            connection.prepare("INSERT INTO hymns_fts(hymns_fts) VALUES('rebuild')")
+                                .use { statement ->
+                                    statement.step()
+                                }
                         }
                     })
                     .build()
